@@ -1,0 +1,2963 @@
+<!-- TVRI Sumsel Dashboard -->
+<!DOCTYPE html>
+<html lang="id" class="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard TVRI Sumsel</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg1:#050A17; --bg2:#081029; --bg3:#0B1B3E;
+    --text:#E9ECF9; --text-dim:#9AA5C7; --text-faint:#6B7599;
+    --glass:rgba(255,255,255,0.035); --glass-strong:rgba(255,255,255,0.065);
+    --glass-border:rgba(255,255,255,0.11); --glass-hi:rgba(255,255,255,0.18);
+    --cyan:#2BE8FF; --electric:#2E6BFF; --blue:#0B5FFF; --lightblue:#7FD1FF;
+    --violet:#8B6BFF; --pink:#FF4FD8; --amber:#FFC24B; --coral:#FF6B5B; --mint:#3CFFC0;
+    --shadow:0 20px 60px rgba(0,0,0,0.45);
+    --grid:rgba(255,255,255,0.08);
+  }
+  html.light{
+    --bg1:#FFFFFF; --bg2:#EEF5FF; --bg3:#E3EDFA;
+    --text:#121732; --text-dim:#4C5578; --text-faint:#7E88AC;
+    --glass:rgba(255,255,255,0.40); --glass-strong:rgba(255,255,255,0.60);
+    --glass-border:rgba(20,50,110,0.10); --glass-hi:rgba(255,255,255,0.85);
+    --cyan:#00B8CC; --electric:#2F6FEF; --blue:#0B4DA1; --lightblue:#BFE0FF;
+    --violet:#7358E0; --pink:#E23FB8; --amber:#D98A0E; --coral:#E0503F; --mint:#12B893;
+    --shadow:0 20px 50px rgba(30,60,130,0.12);
+    --grid:rgba(20,30,70,0.08);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+    background:
+      radial-gradient(circle at 15% 10%, color-mix(in srgb, var(--electric) 28%, transparent), transparent 45%),
+      radial-gradient(circle at 85% 15%, color-mix(in srgb, var(--cyan) 24%, transparent), transparent 45%),
+      radial-gradient(circle at 50% 90%, color-mix(in srgb, var(--blue) 20%, transparent), transparent 50%),
+      linear-gradient(160deg, var(--bg1), var(--bg2) 55%, var(--bg3));
+    background-attachment:fixed;
+    transition:background .5s ease, color .4s ease;
+    overflow-x:hidden;
+  }
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  .orb{position:fixed; border-radius:50%; filter:blur(70px); opacity:.5; z-index:0; pointer-events:none;}
+  .orb1{width:420px;height:420px; background:var(--electric); top:-140px; left:-120px; animation:float1 22s ease-in-out infinite;}
+  .orb2{width:360px;height:360px; background:var(--cyan); top:40%; right:-160px; animation:float2 26s ease-in-out infinite;}
+  .orb3{width:300px;height:300px; background:var(--lightblue); bottom:-160px; left:30%; animation:float3 20s ease-in-out infinite;}
+  @keyframes float1{0%,100%{transform:translate(0,0);}50%{transform:translate(40px,60px);}}
+  @keyframes float2{0%,100%{transform:translate(0,0);}50%{transform:translate(-50px,40px);}}
+  @keyframes float3{0%,100%{transform:translate(0,0);}50%{transform:translate(30px,-40px);}}
+  .glass{
+    background:var(--glass);
+    backdrop-filter:blur(22px) saturate(160%);
+    -webkit-backdrop-filter:blur(22px) saturate(160%);
+    border:1px solid var(--glass-border);
+    border-radius:28px;
+    box-shadow:var(--shadow), inset 0 1px 0 var(--glass-hi);
+    position:relative;
+  }
+  header{
+    position:sticky; top:0; z-index:60; margin:18px 22px 0;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 22px; border-radius:22px;
+  }
+  .brand{display:flex; align-items:center; gap:14px;}
+  .brand-mark{
+    width:42px;height:42px;border-radius:14px;
+    background:linear-gradient(135deg,var(--cyan),var(--electric));
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Orbitron';font-weight:700;color:#04101F;font-size:14px;
+    box-shadow:0 0 24px color-mix(in srgb, var(--cyan) 55%, transparent);
+  }
+  .brand-text .title{font-family:'Orbitron'; font-weight:700; font-size:16px; letter-spacing:.5px;}
+  .brand-text .sub{font-size:10.5px; color:var(--text-faint); margin-top:2px; letter-spacing:.5px;}
+  .header-right{display:flex; align-items:center; gap:14px;}
+  .onair{
+    display:flex; align-items:center; gap:8px;
+    background:color-mix(in srgb, var(--mint) 14%, transparent);
+    border:1px solid color-mix(in srgb, var(--mint) 40%, transparent);
+    padding:7px 14px; border-radius:100px;
+    font-family:'IBM Plex Mono'; font-size:11px; letter-spacing:.5px; color:var(--mint);
+  }
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--mint); animation:pulse 1.8s infinite;}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb, var(--mint) 60%, transparent);}70%{box-shadow:0 0 0 8px transparent;}100%{box-shadow:0 0 0 0 transparent;}}
+  .theme-toggle{display:flex; align-items:center; gap:8px; cursor:pointer; padding:6px 8px; border-radius:100px; border:1px solid var(--glass-border); background:var(--glass-strong); user-select:none;}
+  .theme-toggle .track{width:44px;height:24px;border-radius:100px; position:relative; background:linear-gradient(90deg,var(--electric),var(--cyan));}
+  .theme-toggle .knob{position:absolute; top:2px; left:2px; width:20px;height:20px;border-radius:50%; background:#fff; transition:left .25s ease; display:flex; align-items:center; justify-content:center; font-size:11px; box-shadow:0 2px 6px rgba(0,0,0,.3);}
+  html.light .theme-toggle .knob{ left:22px; }
+  nav{display:flex; gap:6px; margin:16px 22px 0; padding:8px; overflow-x:auto; border-radius:100px;}
+  nav button{background:none;border:none;color:var(--text-dim); font-family:'Inter'; font-weight:600; font-size:13px; padding:10px 18px; cursor:pointer; border-radius:100px; white-space:nowrap; transition:.2s;}
+  nav button:hover{color:var(--text);}
+  nav button.active{color:#04101F; background:linear-gradient(120deg,var(--cyan),var(--electric)); box-shadow:0 0 22px color-mix(in srgb, var(--cyan) 45%, transparent);}
+  main{max-width:1320px; margin:0 auto; padding:26px 22px 90px; position:relative; z-index:1;}
+  .view{display:none;}
+  .view.active{display:block; animation:fade .4s ease;}
+  @keyframes fade{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:translateY(0);}}
+  .section-head{margin-bottom:20px;}
+  .eyebrow{font-family:'IBM Plex Mono'; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--electric); font-weight:600;}
+  h1.page-title{font-family:'Orbitron'; font-size:24px; font-weight:700; margin-top:6px; letter-spacing:.3px;}
+  .page-desc{color:var(--text-dim); font-size:13.5px; margin-top:6px;}
+  .stat-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:26px;}
+  .stat-grid-5{grid-template-columns:repeat(5,1fr);}
+  .card{ padding:20px 22px; }
+  .stat-card .label{font-size:11.5px; color:var(--text-dim); font-weight:600; display:flex; align-items:center; justify-content:space-between; letter-spacing:.3px;}
+  .stat-card .value{font-family:'Orbitron'; font-size:27px; font-weight:700; margin-top:10px;}
+  .stat-card .delta{font-family:'IBM Plex Mono'; font-size:11px; margin-top:8px; display:inline-block; padding:3px 10px; border-radius:100px;}
+  .delta.up{color:var(--mint); background:color-mix(in srgb, var(--mint) 16%, transparent);}
+  .delta.down{color:var(--coral); background:color-mix(in srgb, var(--coral) 16%, transparent);}
+  .delta.warn{color:var(--amber); background:color-mix(in srgb, var(--amber) 16%, transparent);}
+  .delta.flat{color:var(--text-dim); background:var(--glass-strong);}
+  .kpi-link{margin-top:12px; font-size:10px; color:var(--text-faint); font-family:'IBM Plex Mono'; letter-spacing:.3px;}
+  .stat-card .subvalue{font-family:'IBM Plex Mono'; font-size:11px; color:var(--text-faint); margin-top:6px;}
+  .stat-card[data-goto]{cursor:pointer; transition:transform .25s ease, box-shadow .25s ease;}
+  .stat-card[data-goto]:hover{transform:translateY(-3px); box-shadow:0 26px 70px rgba(0,0,0,.5), inset 0 1px 0 var(--glass-hi);}
+  .grid-2{display:grid; grid-template-columns:1.4fr 1fr; gap:16px; margin-bottom:16px;}
+  .grid-2-equal{grid-template-columns:1fr 1fr;}
+  .panel-title{font-family:'Space Grotesk'; font-weight:700; font-size:15px; margin-bottom:2px;}
+  .panel-sub{font-size:11.5px; color:var(--text-faint); margin-bottom:14px;}
+  canvas{max-height:270px;}
+  table{width:100%; border-collapse:collapse; font-size:12.5px;}
+  th{text-align:left; font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:.6px; text-transform:uppercase; color:var(--text-faint); font-weight:600; padding:9px 10px; border-bottom:1.5px solid var(--glass-border);}
+  td{padding:10px 10px; border-bottom:1px solid var(--glass-border); color:var(--text);}
+  tr:last-child td{border-bottom:none;}
+
+  /* Tabel panjang (disposisi, aset BMN, pegawai/pensiun) -- tampilkan
+     kira-kira 10 baris, sisanya di-scroll di dalam tabel saja supaya
+     halaman tidak ikut ter-scroll jauh ke bawah. Header tetap terlihat
+     (sticky) saat scroll. */
+  .table-scroll{max-height:460px; overflow-y:auto;}
+  .table-scroll table{border-collapse:separate; border-spacing:0;}
+  .table-scroll thead th{position:sticky; top:0; background:var(--bg2); z-index:1;}
+  .pill{padding:3px 10px; border-radius:100px; font-size:10.5px; font-weight:600; font-family:'IBM Plex Mono';}
+  .pill.red{background:color-mix(in srgb, var(--coral) 18%, transparent); color:var(--coral);}
+  .pill.amber{background:color-mix(in srgb, var(--amber) 18%, transparent); color:var(--amber);}
+  .pill.green{background:color-mix(in srgb, var(--mint) 18%, transparent); color:var(--mint);}
+  .pill.blue{background:color-mix(in srgb, var(--cyan) 18%, transparent); color:var(--cyan);}
+  .pill.violet{background:color-mix(in srgb, var(--violet) 20%, transparent); color:var(--violet);}
+  .platform-row{display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--glass-border);}
+  .platform-row:last-child{border-bottom:none;}
+  .p-icon{width:38px;height:38px;border-radius:13px; display:flex; align-items:center; justify-content:center; color:#fff; font-family:'Space Grotesk'; font-weight:700; font-size:12.5px; flex-shrink:0;}
+  .p-ig{background:linear-gradient(135deg,#F58529,#DD2A7B,#8134AF);}
+  .p-fb{background:#1877F2;}
+  .p-yt{background:#FF0000;}
+  .p-x{background:#111;}
+  .p-tt{background:linear-gradient(135deg,#25F4EE,#111,#FE2C55);}
+  .p-info{flex:1;}
+  .p-name{font-weight:600; font-size:13px;}
+  .p-meta{font-size:11px; color:var(--text-faint);}
+  .p-val{font-family:'IBM Plex Mono'; font-weight:600; font-size:14.5px; text-align:right;}
+  .tower-card{padding:18px 20px; margin-bottom:12px;}
+  .tower-head{display:flex; justify-content:space-between; align-items:flex-start;}
+  .tower-name{font-family:'Space Grotesk'; font-weight:700; font-size:15px;}
+  .tower-loc{font-size:11.5px; color:var(--text-faint); margin-top:2px;}
+  .tower-metrics{display:flex; gap:24px; margin-top:14px;}
+  .tm-label{font-size:10px; text-transform:uppercase; letter-spacing:.6px; color:var(--text-faint); font-family:'IBM Plex Mono';}
+  .tm-val{font-family:'Orbitron'; font-weight:700; font-size:16px; margin-top:3px;}
+  .bar-track{height:6px; background:var(--glass-strong); border-radius:10px; margin-top:10px; overflow:hidden;}
+  .bar-fill{height:100%; background:linear-gradient(90deg,var(--cyan),var(--electric)); border-radius:10px;}
+  #mapPemancar{ height:420px; border-radius:22px; overflow:hidden; border:1px solid var(--glass-border);}
+  .map-wrap{padding:20px 22px; margin-bottom:16px;}
+  .map-legend{display:flex; gap:18px; margin-top:12px; flex-wrap:wrap;}
+  .map-legend .item{display:flex; align-items:center; gap:7px; font-size:11.5px; color:var(--text-dim);}
+  .map-legend .swatch{width:11px;height:11px;border-radius:50%;}
+  .leaflet-popup-content-wrapper{border-radius:14px; box-shadow:0 8px 30px rgba(0,0,0,.35); background:var(--bg2); color:var(--text);}
+  .leaflet-popup-tip{background:var(--bg2);}
+  .leaflet-popup-content{margin:14px 16px; font-family:'Inter',sans-serif;}
+  .popup-title{font-family:'Space Grotesk'; font-weight:700; font-size:14px; color:var(--text); margin-bottom:2px;}
+  .popup-loc{font-size:11px; color:var(--text-faint); margin-bottom:10px;}
+  .popup-row{display:flex; justify-content:space-between; font-size:11.5px; padding:4px 0; border-top:1px solid var(--glass-border);}
+  .popup-row span:first-child{color:var(--text-faint);}
+  .popup-row span:last-child{font-family:'IBM Plex Mono'; font-weight:600; color:var(--cyan);}
+  .tower-pin{width:16px;height:16px;border-radius:50%; border:3px solid #fff; box-shadow:0 2px 10px rgba(0,0,0,.4);}
+  .filter-row{display:flex; gap:8px; margin-bottom:18px; flex-wrap:wrap;}
+  .filter-chip{padding:8px 16px; border-radius:100px; font-size:12px; font-weight:600; cursor:pointer; border:1px solid var(--glass-border); background:var(--glass); color:var(--text-dim); transition:.2s;}
+  .filter-chip.active{ color:#04101F; background:linear-gradient(120deg,var(--cyan),var(--electric)); border-color:transparent;}
+  .attention-panel .panel-title{margin-bottom:2px;}
+  .attention-row{display:flex; align-items:center; gap:12px; padding:14px 6px; border-bottom:1px solid var(--glass-border); cursor:pointer; transition:.2s; border-radius:14px;}
+  .attention-row:last-child{border-bottom:none;}
+  .attention-row:hover{background:var(--glass-strong); padding-left:12px; padding-right:12px;}
+  .attn-dot{width:10px;height:10px;border-radius:50%; flex-shrink:0;}
+  .attn-dot.red{background:var(--coral); box-shadow:0 0 10px color-mix(in srgb, var(--coral) 60%, transparent);}
+  .attn-dot.amber{background:var(--amber); box-shadow:0 0 10px color-mix(in srgb, var(--amber) 60%, transparent);}
+  .attn-dot.green{background:var(--mint); box-shadow:0 0 10px color-mix(in srgb, var(--mint) 60%, transparent);}
+  .attn-text{flex:1; font-size:13.5px;}
+  .attn-arrow{font-family:'IBM Plex Mono'; font-size:11px; color:var(--text-faint); white-space:nowrap;}
+  .attention-empty{padding:18px 6px; font-size:13px; color:var(--text-dim);}
+  .placeholder-card{text-align:center; padding:70px 24px; display:flex; flex-direction:column; align-items:center; gap:10px;}
+  .placeholder-icon{font-size:42px; opacity:.9;}
+  .placeholder-title{font-family:'Space Grotesk'; font-weight:700; font-size:18px;}
+  .placeholder-desc{color:var(--text-dim); font-size:13px; max-width:440px; line-height:1.6;}
+  .placeholder-tag{margin-top:6px; font-family:'IBM Plex Mono'; font-size:10.5px; letter-spacing:.6px; color:var(--text-faint); text-transform:uppercase; padding:5px 14px; border-radius:100px; border:1px dashed var(--glass-border);}
+  .jadwal-row{display:flex; align-items:center; justify-content:space-between; gap:14px; padding:12px 4px; border-bottom:1px solid var(--glass-border);}
+  .jadwal-row:last-child{border-bottom:none;}
+  .jadwal-row .jr-main{min-width:0;}
+  .jadwal-row .jr-title{font-weight:600; font-size:13.5px;}
+  .jadwal-row .jr-sub{font-size:11.5px; color:var(--text-faint); margin-top:3px;}
+  .jadwal-row .jr-badge{font-family:'IBM Plex Mono'; font-size:11px; font-weight:600; padding:5px 12px; border-radius:100px; white-space:nowrap;}
+  .jadwal-row .jr-badge.urgent{color:var(--coral); background:color-mix(in srgb, var(--coral) 16%, transparent);}
+  .jadwal-row .jr-badge.soon{color:var(--amber); background:color-mix(in srgb, var(--amber) 16%, transparent);}
+  .jadwal-row .jr-badge.later{color:var(--mint); background:color-mix(in srgb, var(--mint) 16%, transparent);}
+  .jadwal-row .jr-badge.past{color:var(--text-faint); background:var(--glass-strong);}
+  .footer-note{margin-top:36px; padding:16px 22px; text-align:center; font-size:11px; color:var(--text-faint); font-family:'IBM Plex Mono';}
+  /* Watermark kredit — sengaja dibuat sangat samar, cuma kelihatan kalau
+     benar-benar diperhatikan. Tidak mengganggu tampilan / tidak menutupi
+     konten apa pun (pointer-events dimatikan). */
+  .credit-watermark{
+    position:fixed; right:10px; bottom:8px; z-index:40;
+    font-family:'IBM Plex Mono', monospace; font-size:9px; letter-spacing:.5px;
+    color:var(--text-faint); opacity:.22; user-select:none; pointer-events:none;
+  }
+  .umum-row:hover{background:var(--glass-strong);}
+  .modal-overlay{position:fixed; inset:0; background:rgba(2,6,20,0.6); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); display:none; align-items:center; justify-content:center; z-index:300; padding:20px;}
+  .modal-overlay.active{display:flex;}
+  .modal-box{max-width:540px; width:100%; max-height:82vh; overflow-y:auto; padding:26px 26px 22px; position:relative;}
+  .modal-close{position:absolute; top:14px; right:14px; background:var(--glass-strong); border:1px solid var(--glass-border); color:var(--text-dim); width:30px; height:30px; border-radius:50%; cursor:pointer; font-size:14px; line-height:1;}
+  .modal-close:hover{color:var(--text);}
+  .detail-row{display:flex; justify-content:space-between; gap:18px; padding:10px 0; border-bottom:1px solid var(--glass-border); font-size:13px;}
+  .detail-row:last-child{border-bottom:none;}
+  .detail-row .dk{color:var(--text-faint); flex-shrink:0; min-width:170px;}
+  .detail-row .dv{text-align:right; font-weight:500; word-break:break-word;}
+  @media(max-width:1100px){
+    .stat-grid-5{grid-template-columns:repeat(3,1fr);}
+  }
+  @media(max-width:900px){
+    .stat-grid{grid-template-columns:repeat(2,1fr);}
+    .stat-grid-5{grid-template-columns:repeat(2,1fr);}
+    .grid-2{grid-template-columns:1fr;}
+    .grid-2-equal{grid-template-columns:1fr;}
+    header{padding:12px 16px; margin:12px 12px 0;} nav{margin:12px 12px 0;} main{padding:18px 12px 70px;}
+  }
+
+    /* TVRI Sumsel logo adjustment (diperbesar 30% dari ukuran sebelumnya) */
+    .brand-mark.brand-logo{
+      width:auto;
+      min-width:75px;
+      height:62px;
+      padding:6px 10px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+      background:rgba(255,255,255,.035);
+      border:1px solid rgba(255,255,255,.10);
+    }
+    .brand-mark.brand-logo img{
+      display:block;
+      width:auto;
+      height:49px;
+      max-width:143px;
+      object-fit:contain;
+    }
+
+    /* More transparent futuristic glassmorphism */
+    .glass{
+      background:var(--glass);
+      backdrop-filter:blur(24px) saturate(145%);
+      -webkit-backdrop-filter:blur(24px) saturate(145%);
+    }
+    .glass.strong{
+      background:var(--glass-strong);
+      backdrop-filter:blur(26px) saturate(145%);
+      -webkit-backdrop-filter:blur(26px) saturate(145%);
+    }
+
+    /* Blue-centric theme accents */
+    .btn-primary{
+      background:linear-gradient(135deg,var(--blue),var(--cyan));
+    }
+    .btn-primary:hover{
+      box-shadow:0 10px 26px rgba(11,99,206,.25);
+    }
+
+  /* ===================== LAYAR LOGIN ===================== */
+  #loginOverlay{
+    position:fixed; inset:0; z-index:9999;
+    display:flex; align-items:center; justify-content:center;
+    padding:20px;
+    background:
+      radial-gradient(circle at 15% 10%, color-mix(in srgb, var(--electric) 28%, transparent), transparent 45%),
+      radial-gradient(circle at 85% 15%, color-mix(in srgb, var(--cyan) 24%, transparent), transparent 45%),
+      radial-gradient(circle at 50% 90%, color-mix(in srgb, var(--blue) 20%, transparent), transparent 50%),
+      linear-gradient(160deg, var(--bg1), var(--bg2) 55%, var(--bg3));
+  }
+  #loginOverlay.hidden{ display:none; }
+  .login-card{ width:100%; max-width:380px; padding:38px 34px 30px; text-align:center; }
+  .login-logo{
+    width:64px; height:64px; border-radius:18px; overflow:hidden;
+    background:linear-gradient(135deg,var(--cyan),var(--electric));
+    display:flex; align-items:center; justify-content:center;
+    margin:0 auto 18px;
+    box-shadow:0 0 30px color-mix(in srgb, var(--cyan) 55%, transparent);
+  }
+  .login-logo img{ width:100%; height:100%; object-fit:contain; padding:9px; }
+  .login-title{ font-family:'Orbitron'; font-weight:700; font-size:16.5px; letter-spacing:.4px; }
+  .login-sub{ font-size:11.5px; color:var(--text-faint); margin:6px 0 26px; letter-spacing:.4px; font-family:'IBM Plex Mono'; }
+  .login-field{ text-align:left; margin-bottom:14px; }
+  .login-field label{ display:block; font-family:'IBM Plex Mono'; font-size:10px; letter-spacing:.6px; text-transform:uppercase; color:var(--text-faint); margin-bottom:6px; }
+  .login-field input{
+    width:100%; padding:11px 14px; border-radius:12px; border:1px solid var(--glass-border);
+    background:var(--glass-strong); color:var(--text); font-family:'Inter'; font-size:13.5px; outline:none;
+    transition:border-color .2s ease;
+  }
+  .login-field input:focus{ border-color:var(--cyan); }
+  .login-btn{
+    width:100%; margin-top:8px; padding:12px 14px; border:none; border-radius:12px;
+    font-family:'Space Grotesk'; font-weight:700; font-size:13.5px; letter-spacing:.3px; color:#04101F; cursor:pointer;
+    background:linear-gradient(120deg,var(--cyan),var(--electric));
+    box-shadow:0 12px 30px color-mix(in srgb, var(--cyan) 35%, transparent);
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .login-btn:hover{ transform:translateY(-1px); }
+  .login-btn:disabled{ opacity:.6; cursor:not-allowed; transform:none; }
+  .login-error{
+    font-size:11.5px; color:var(--coral); text-align:left;
+    background:color-mix(in srgb, var(--coral) 14%, transparent);
+    border:1px solid color-mix(in srgb, var(--coral) 35%, transparent);
+    border-radius:10px; padding:9px 12px; margin-bottom:14px; display:none;
+  }
+  .login-error.show{ display:block; }
+  .login-foot{ margin-top:22px; font-size:10px; color:var(--text-faint); font-family:'IBM Plex Mono'; letter-spacing:.4px; }
+  .logout-btn{
+    display:flex; align-items:center; gap:6px; cursor:pointer; padding:8px 14px; border-radius:100px;
+    border:1px solid var(--glass-border); background:var(--glass-strong); color:var(--text-dim);
+    font-family:'IBM Plex Mono'; font-size:10.5px; letter-spacing:.4px;
+  }
+  .logout-btn:hover{ color:var(--coral); }
+
+  </style>
+</head>
+<body>
+
+<!-- ===================== LAYAR LOGIN ===================== -->
+<div id="loginOverlay">
+  <div class="glass login-card">
+    <div class="login-logo">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/e/ec/TVRI_Sumatera_Selatan_2023.svg" alt="Logo TVRI Sumatera Selatan">
+    </div>
+    <div class="login-title">DASHBOARD TVRI SUMATERA SELATAN</div>
+    <div class="login-sub">PORTAL INTERNAL &middot; MASUK UNTUK MELANJUTKAN</div>
+    <div class="login-error" id="loginError"></div>
+    <form id="loginForm">
+      <div class="login-field">
+        <label for="loginUsername">Username</label>
+        <input type="text" id="loginUsername" autocomplete="username" required>
+      </div>
+      <div class="login-field">
+        <label for="loginPassword">Password</label>
+        <input type="password" id="loginPassword" autocomplete="current-password" required>
+      </div>
+      <button type="submit" class="login-btn" id="loginBtn">Masuk</button>
+    </form>
+    <div class="login-foot">Akses terbatas untuk staf TVRI Sumatera Selatan</div>
+  </div>
+</div>
+
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+
+<header class="glass">
+  <div class="brand">
+    <div class="brand-mark brand-logo">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/e/ec/TVRI_Sumatera_Selatan_2023.svg"
+               alt="Logo TVRI Sumatera Selatan">
+        </div>
+    <div class="brand-text">
+      <div class="title">DASHBOARD TVRI SUMATERA SELATAN</div>
+      <div class="sub">DASHBOARD OPERASIONAL</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="onair" id="connStatus"><span class="dot"></span> DATA CONTOH</div>
+    <div class="theme-toggle" id="themeToggle">
+      <span class="mono" style="font-size:10.5px; color:var(--text-dim);">MODE</span>
+      <div class="track"><div class="knob" id="knob">☀️</div></div>
+    </div>
+    <div class="logout-btn" id="logoutBtn">🔒 KELUAR</div>
+  </div>
+</header>
+
+<nav class="glass" id="mainNav">
+  <button class="active" data-view="beranda">BERANDA</button>
+  <button data-view="umum">UMUM</button>
+  <!-- KMB disembunyikan sementara -- hapus style="display:none" di bawah untuk memunculkan lagi -->
+  <button data-view="kmb" style="display:none;">KMB</button>
+  <button data-view="bmn">BMN</button>
+  <button data-view="sdm">SDM</button>
+  <button data-view="keuangan">KEUANGAN</button>
+  <!-- TRANSMISI disembunyikan sementara -- hapus style="display:none" di bawah untuk memunculkan lagi -->
+  <button data-view="transmisi" style="display:none;">TRANSMISI</button>
+</nav>
+
+<main>
+
+  <!-- ===================== BERANDA ===================== -->
+  <div class="view active" id="beranda">
+    <div class="section-head">
+      <div class="eyebrow">Beranda</div>
+      <h1 class="page-title">Kondisi Terkini TVRI Sumatera Selatan</h1>
+      <p class="page-desc">Gambaran cepat kondisi seluruh unit untuk manajemen — klik kartu atau grafik untuk masuk ke detail modul terkait.</p>
+    </div>
+
+    <!-- BARIS 1 — 4 KPI Utama (Total Aset BMN digabung ke sini, sejajar dengan 3 KPI lain.
+         Total Followers & Pemancar Aktif disembunyikan sementara bersama tab KMB & TRANSMISI) -->
+    <div class="stat-grid" style="grid-template-columns:repeat(4,1fr);">
+      <div class="card stat-card glass" data-goto="sdm">
+        <div class="label">Total Pegawai <span>👥</span></div>
+        <div class="value" id="berandaKpiPegawai">126</div>
+        <span class="delta flat">Seluruh Unit Kerja</span>
+        <div class="kpi-link">Lihat Detail SDM →</div>
+      </div>
+      <div class="card stat-card glass" data-goto="sdm">
+        <div class="label">Pensiun ≤ 3 Tahun <span>⏳</span></div>
+        <div class="value" id="berandaKpiPensiun">9</div>
+        <span class="delta warn">Perlu rencana suksesi</span>
+        <div class="kpi-link">Lihat Detail SDM →</div>
+      </div>
+      <div class="card stat-card glass" data-goto="umum">
+        <div class="label">Total Disposisi Surat <span>✉️</span></div>
+        <div class="value" id="berandaKpiDisposisi">987</div>
+        <span class="delta flat">Terhubung dengan Tab Umum</span>
+        <div class="kpi-link">Lihat Detail Umum →</div>
+      </div>
+      <div class="card stat-card glass" data-goto="bmn">
+        <div class="label">Total Aset BMN <span>📦</span></div>
+        <div class="value" id="berandaKpiTotalAset">–</div>
+        <span class="delta flat">Tercatat di BMN_Aset</span>
+        <div class="kpi-link">Lihat Detail BMN →</div>
+      </div>
+    </div>
+
+    <!-- BARIS 2 — Komposisi SDM (Perkembangan Followers disembunyikan sementara bersama tab KMB) -->
+    <div class="card glass">
+      <div class="panel-title">Komposisi Sumber Daya Manusia</div>
+      <div class="panel-sub">Klik perspektif untuk mengganti tampilan komposisi</div>
+      <div class="filter-row" id="sdmFilterRow">
+        <div class="filter-chip active" data-key="GENERASI">GENERASI</div>
+        <div class="filter-chip" data-key="USIA">USIA</div>
+        <div class="filter-chip" data-key="JABATAN">JABATAN</div>
+        <div class="filter-chip" data-key="UNIT_KERJA">UNIT KERJA</div>
+      </div>
+      <canvas id="chartSDMBeranda"></canvas>
+    </div>
+
+    <!-- BARIS 3 — Perhatian Manajemen (full width) -->
+    <div class="card glass attention-panel">
+      <div class="panel-title">Perhatian Manajemen</div>
+      <div class="panel-sub">Ringkasan lintas modul yang memerlukan tindak lanjut — klik untuk membuka modul terkait</div>
+      <div id="attentionList"></div>
+    </div>
+  </div>
+
+  <!-- ===================== UMUM ===================== -->
+  <div class="view" id="umum">
+    <div class="section-head">
+      <div class="eyebrow">Umum</div>
+      <h1 class="page-title">Surat-Menyurat &amp; Disposisi Tata Usaha</h1>
+      <p class="page-desc">Rekap disposisi eksternal dan internal dari Sekretariat TVRI Sumsel.</p>
+    </div>
+
+    <div class="stat-grid" style="grid-template-columns:repeat(3,1fr);">
+      <div class="card stat-card glass">
+        <div class="label">Total Disposisi <span>📨</span></div>
+        <div class="value" id="umumKpiTotal">–</div>
+        <span class="delta flat">Eksternal + Internal</span>
+      </div>
+      <div class="card stat-card glass">
+        <div class="label">Internal <span>📥</span></div>
+        <div class="value" id="umumKpiInternal">–</div>
+        <span class="delta flat">Dari dalam instansi</span>
+      </div>
+      <div class="card stat-card glass">
+        <div class="label">Eksternal <span>📤</span></div>
+        <div class="value" id="umumKpiEksternal">–</div>
+        <span class="delta flat">Dari luar instansi</span>
+      </div>
+    </div>
+
+    <div class="card glass" style="max-width:520px; margin:0 auto;">
+      <div class="panel-title">Komposisi Disposisi</div>
+      <div class="panel-sub">Perbandingan Internal vs Eksternal</div>
+      <canvas id="chartDispoKomposisi"></canvas>
+    </div>
+
+    <div class="card glass">
+      <div class="panel-title">Pencarian Surat / Disposisi</div>
+      <div class="panel-sub">Pilih kolom pencarian supaya hasilnya lebih tepat — Perihal tetap bisa dilihat dengan klik barisnya</div>
+      <div style="display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap;">
+        <select id="umumSearchField" style="padding:12px 14px; border-radius:100px; border:1px solid var(--glass-border); background:var(--glass); color:var(--text); font-size:13px; outline:none; font-family:'Inter',sans-serif;">
+          <option value="SEMUA">Semua Kolom</option>
+          <option value="nomorDispo">No Dispo</option>
+          <option value="nomorSurat">No Surat</option>
+          <option value="suratDari">Surat Dari</option>
+          <option value="perihal">Perihal</option>
+        </select>
+        <input type="text" id="umumSearchInput" placeholder="🔍 Ketik kata kunci pencarian..."
+          style="flex:1; min-width:200px; padding:12px 18px; border-radius:100px; border:1px solid var(--glass-border); background:var(--glass); color:var(--text); font-size:13px; outline:none; font-family:'Inter',sans-serif;">
+        <input type="date" id="umumDateFilter" title="Filter berdasarkan tanggal dispo (opsional)"
+          style="padding:12px 14px; border-radius:100px; border:1px solid var(--glass-border); background:var(--glass); color:var(--text); font-size:13px; outline:none; font-family:'Inter',sans-serif;">
+      </div>
+      <div class="filter-row" id="umumFilterRow">
+        <div class="filter-chip active" data-key="SEMUA">SEMUA</div>
+        <div class="filter-chip" data-key="INTERNAL">INTERNAL</div>
+        <div class="filter-chip" data-key="EKSTERNAL">EKSTERNAL</div>
+      </div>
+      <div id="umumLoadingState" style="text-align:center; padding:30px; color:var(--text-faint); font-size:13px;">Memuat data disposisi dari spreadsheet...</div>
+      <div id="umumEmptyState" style="display:none; text-align:center; padding:30px; color:var(--text-faint); font-size:13px;">Tidak ada data yang cocok dengan pencarian/filter ini.</div>
+      <div id="umumTableWrap" class="table-scroll" style="display:none; overflow-x:auto;">
+        <table>
+          <thead><tr><th>Jenis</th><th>No Dispo</th><th>Tgl Dispo</th><th>Surat Dari</th><th>No Surat</th></tr></thead>
+          <tbody id="umumResultsBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== KMB ===================== -->
+  <div class="view" id="kmb">
+    <div class="section-head">
+      <div class="eyebrow">Komunikasi &amp; Media</div>
+      <h1 class="page-title">KMB — Pertumbuhan &amp; Distribusi Audiens Digital</h1>
+      <p class="page-desc">YouTube, Instagram, Facebook, TikTok, dan X — data followers/subscriber langsung dari spreadsheet (sheet KMB_SOSMED).</p>
+    </div>
+
+    <div id="kmbLoadingState" style="text-align:center; padding:24px; color:var(--text-faint); font-size:13px;">Memuat data KMB dari spreadsheet...</div>
+
+    <div id="kmbContent" style="display:none;">
+
+      <div class="stat-grid stat-grid-5">
+        <div class="card stat-card glass">
+          <div class="label">Total Followers <span>📡</span></div>
+          <div class="value" id="kmbKpiTotal">–</div>
+          <span class="delta flat" id="kmbKpiTotalSub">Semua Platform</span>
+        </div>
+        <div class="card stat-card glass">
+          <div class="label">Pertumbuhan Total <span>📈</span></div>
+          <div class="value" id="kmbKpiGrowth">–</div>
+          <span class="delta flat" id="kmbKpiGrowthSub">vs Bulan Lalu</span>
+        </div>
+        <div class="card stat-card glass">
+          <div class="label">Platform Terbesar <span>🏆</span></div>
+          <div class="value" id="kmbKpiBiggest">–</div>
+          <span class="delta flat" id="kmbKpiBiggestSub">–</span>
+        </div>
+        <div class="card stat-card glass">
+          <div class="label">Penambahan Terbesar <span>➕</span></div>
+          <div class="value" id="kmbKpiAddition">–</div>
+          <span class="delta flat" id="kmbKpiAdditionSub">–</span>
+        </div>
+        <div class="card stat-card glass">
+          <div class="label">Pertumbuhan Tercepat <span>🚀</span></div>
+          <div class="value" id="kmbKpiFastest">–</div>
+          <span class="delta flat" id="kmbKpiFastestSub">–</span>
+        </div>
+      </div>
+
+      <div class="grid-2 grid-2-equal">
+        <div class="card glass">
+          <div class="panel-title">Pertumbuhan Followers per Platform</div>
+          <div class="panel-sub">Klik legenda untuk menampilkan/menyembunyikan satu platform</div>
+          <canvas id="chartKmbGrowth"></canvas>
+        </div>
+        <div class="card glass">
+          <div class="panel-title">Distribusi Followers Terkini</div>
+          <div class="panel-sub" id="kmbDistribusiSub">Komposisi antar platform bulan ini</div>
+          <canvas id="chartKmbDistribusi"></canvas>
+        </div>
+      </div>
+
+      <div class="card glass">
+        <div class="panel-title">Perkembangan Followers</div>
+        <div class="panel-sub">Perbandingan bulan lalu vs bulan ini per platform</div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead><tr><th>Platform</th><th>Bulan Lalu</th><th>Bulan Ini</th><th>Perubahan</th><th>Pertumbuhan</th></tr></thead>
+            <tbody id="kmbTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===================== BMN ===================== -->
+  <div class="view" id="bmn">
+    <div class="section-head">
+      <div class="eyebrow">Barang Milik Negara</div>
+      <h1 class="page-title">Inventaris &amp; Aset (BMN)</h1>
+      <p class="page-desc">Master data aset, kondisi, usulan penghapusan, dan status pemanfaatan/PSP — data langsung dari spreadsheet.</p>
+    </div>
+
+    <div id="bmnLoadingState" style="text-align:center; padding:24px; color:var(--text-faint); font-size:13px;">Memuat data BMN dari spreadsheet...</div>
+
+    <div id="bmnContent" style="display:none;">
+
+      <!-- Jadwal & Pengingat Penting (BMN_Jadwal) dipindahkan ke Beranda ->
+           Perhatian Manajemen. Tab BMN sekarang fokus ke 4 KPI utama:
+           Total Aset, Kondisi Aset, Penghapusan, Pemanfaatan/PSP. -->
+      <div class="stat-grid">
+        <div class="card stat-card glass">
+          <div class="label">Total Aset BMN <span>📦</span></div>
+          <div class="value" id="bmnKpiTotalAset">–</div>
+          <span class="delta flat">Tercatat di BMN_Aset</span>
+        </div>
+        <div class="card stat-card glass">
+          <div class="label">Kondisi Aset <span>🧰</span></div>
+          <div style="margin-top:10px; display:flex; flex-direction:column; gap:8px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; font-size:12.5px;">
+              <span style="display:flex; align-items:center; gap:6px; color:var(--text-dim);"><span class="attn-dot green"></span>Baik</span>
+              <span class="mono" id="bmnKpiKondisiBaik">–</span>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:space-between; font-size:12.5px;">
+              <span style="display:flex; align-items:center; gap:6px; color:var(--text-dim);"><span class="attn-dot amber"></span>Rusak Ringan</span>
+              <span class="mono" id="bmnKpiKondisiRr">–</span>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:space-between; font-size:12.5px;">
+              <span style="display:flex; align-items:center; gap:6px; color:var(--text-dim);"><span class="attn-dot red"></span>Rusak Berat</span>
+              <span class="mono" id="bmnKpiKondisiRb">–</span>
+            </div>
+          </div>
+        </div>
+        <div class="card stat-card glass">
+          <div class="label">Usulan Penghapusan <span>🗑️</span></div>
+          <div class="value" id="bmnKpiTotalPenghapusan">–</div>
+          <div class="subvalue" id="bmnKpiTotalPenghapusanSub">–</div>
+        </div>
+        <div class="card stat-card glass">
+          <div class="label">Pemanfaatan / PSP <span>🤝</span></div>
+          <div class="value" id="bmnKpiPemanfaatan">–</div>
+          <div class="subvalue" id="bmnKpiBelumPspSub">–</div>
+        </div>
+      </div>
+
+      <div class="grid-2 grid-2-equal">
+        <div class="card glass">
+          <div class="panel-title">Distribusi Kondisi Aset</div>
+          <div class="panel-sub">Baik / Rusak Ringan / Rusak Berat — berdasarkan kolom Kondisi di BMN_Aset</div>
+          <canvas id="chartBmnKondisiAset"></canvas>
+        </div>
+
+        <div class="card glass">
+          <div class="panel-title">Status PSP (Penetapan Status Penggunaan)</div>
+          <div class="panel-sub" id="bmnPspSub">Sudah PSP vs Belum PSP</div>
+          <canvas id="chartBmnPsp"></canvas>
+        </div>
+      </div>
+
+      <div class="card glass" style="margin-bottom:16px;">
+        <div class="panel-title">Usulan Penghapusan BMN</div>
+        <div class="panel-sub">Klik baris untuk detail lengkap</div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead><tr><th>Jenis / Objek</th><th>Kondisi</th><th>Nilai Perolehan</th><th>Jumlah (Unit)</th><th>Status SK</th><th>Tindak Lanjut / Kendala</th></tr></thead>
+            <tbody id="bmnPenghapusanBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card glass" style="margin-bottom:16px;">
+        <div class="panel-title">Pemanfaatan Aset (Sewa / Kerjasama)</div>
+        <div class="panel-sub">Data dari sheet BMN_PSP &amp; Pemanfaatan</div>
+        <div id="bmnPemanfaatanEmptyState" style="display:none; text-align:center; padding:20px; color:var(--text-faint); font-size:13px;">Belum ada data pemanfaatan aset.</div>
+        <div id="bmnPemanfaatanWrap" style="display:none; overflow-x:auto;">
+          <table>
+            <thead><tr><th>Bentuk Pemanfaatan</th><th>Objek BMN</th><th>Mitra / Pengelola</th><th>Status Dokumen</th><th>Tindak Lanjut / Kendala</th></tr></thead>
+            <tbody id="bmnPemanfaatanBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card glass">
+        <div class="panel-title">Database Aset BMN</div>
+        <div class="panel-sub">Sumber: BMN_Aset — klik baris untuk detail lengkap</div>
+        <div style="margin-bottom:14px;">
+          <input type="text" id="bmnAsetSearchInput" placeholder="🔍 Cari Aset (Kode Barang / NUP / Nama Barang / Kode Register)..."
+            style="width:100%; padding:12px 18px; border-radius:100px; border:1px solid var(--glass-border); background:var(--glass); color:var(--text); font-size:13px; outline:none; font-family:'Inter',sans-serif;">
+        </div>
+        <div id="bmnAsetEmptyState" style="display:none; text-align:center; padding:20px; color:var(--text-faint); font-size:13px;">Tidak ada aset yang cocok dengan pencarian.</div>
+        <div id="bmnAsetTableWrap" class="table-scroll" style="overflow-x:auto;">
+          <table>
+            <thead><tr><th>Kode Barang</th><th>NUP</th><th>Nama Barang</th><th>Kode Register</th><th>Kondisi</th></tr></thead>
+            <tbody id="bmnAsetBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ===================== SDM ===================== -->
+  <div class="view" id="sdm">
+    <div class="section-head">
+      <div class="eyebrow">Sumber Daya Manusia</div>
+      <h1 class="page-title">Data Kepegawaian (SDM)</h1>
+      <p class="page-desc">Distribusi generasi, golongan, unit kerja, dan proyeksi pensiun 2026–2028.</p>
+    </div>
+
+    <div class="stat-grid stat-grid-5">
+      <div class="card stat-card glass">
+        <div class="label">Total Pegawai <span>👥</span></div>
+        <div class="value" id="sdmKpiTotal">–</div>
+        <span class="delta flat">PNS + PPPK + Kontrak</span>
+      </div>
+      <div class="card stat-card glass">
+        <div class="label">Rasio Status Pegawai <span>🪪</span></div>
+        <div class="value" id="sdmKpiStatusRatio" style="font-size:22px;">–</div>
+        <span class="delta flat">PNS : PPPK : Kontrak</span>
+      </div>
+      <div class="card stat-card glass">
+        <div class="label">Rata-rata Usia <span>🎂</span></div>
+        <div class="value" id="sdmKpiUsia">–</div>
+        <span class="delta flat">Tahun</span>
+      </div>
+      <div class="card stat-card glass">
+        <div class="label">Pensiun ≤ 3 Tahun <span>⏳</span></div>
+        <div class="value" id="sdmKpiPensiun">–</div>
+        <span class="delta warn">Tahun 2026–2027</span>
+      </div>
+      <div class="card stat-card glass">
+        <div class="label">Rasio Gender <span>⚧</span></div>
+        <div class="value" id="sdmKpiGender">–</div>
+        <span class="delta flat">Laki-laki : Perempuan</span>
+      </div>
+    </div>
+
+    <div class="card glass">
+      <div class="panel-title">Cek Sisa Cuti Pegawai</div>
+      <div class="panel-sub">Cari nama pegawai untuk melihat rincian sisa cuti — daftar seluruh pegawai tidak ditampilkan, hanya hasil pencarian</div>
+      <div style="margin-bottom:4px;">
+        <input type="text" id="sdmCutiSearchInput" placeholder="🔍 Cari nama pegawai..."
+          style="width:100%; padding:12px 18px; border-radius:100px; border:1px solid var(--glass-border); background:var(--glass); color:var(--text); font-size:13px; outline:none; font-family:'Inter',sans-serif;">
+      </div>
+      <div id="sdmCutiResult"></div>
+    </div>
+
+    <div id="sdmLoadingState" style="text-align:center; padding:24px; color:var(--text-faint); font-size:13px;">Memuat data kepegawaian dari spreadsheet...</div>
+
+    <div class="grid-2 grid-2-equal">
+      <div class="card glass">
+        <div class="panel-title">Komposisi</div>
+        <div class="panel-sub">Generasi atau usia pegawai saat ini</div>
+        <div class="filter-row" id="sdmKomposisiFilterRow">
+          <div class="filter-chip active" data-key="GENERASI">GENERASI</div>
+          <div class="filter-chip" data-key="USIA">USIA</div>
+        </div>
+        <canvas id="chartSdmGenerasi"></canvas>
+      </div>
+      <div class="card glass">
+        <div class="panel-title">Distribusi Golongan</div>
+        <div class="panel-sub">PNS: Golongan I–IV · PPPK: Grade sesuai data yang tersedia</div>
+        <div class="filter-row" id="sdmGolonganFilterRow">
+          <div class="filter-chip active" data-key="PNS">PNS</div>
+          <div class="filter-chip" data-key="PPPK">PPPK</div>
+        </div>
+        <canvas id="chartSdmGolongan"></canvas>
+      </div>
+    </div>
+
+    <div class="grid-2 grid-2-equal">
+      <div class="card glass">
+        <div class="panel-title">Sebaran Pegawai per Unit Kerja</div>
+        <div class="panel-sub">Hasil pencocokan data pegawai ke 7 unit kerja</div>
+        <canvas id="chartSdmUnitKerja"></canvas>
+      </div>
+      <div class="card glass">
+        <div class="panel-title">Top Jabatan Terbanyak</div>
+        <div class="panel-sub">8 judul jabatan dengan jumlah pegawai terbanyak</div>
+        <canvas id="chartSdmJabatan"></canvas>
+      </div>
+    </div>
+
+    <div class="card glass">
+      <div class="panel-title">Proyeksi Pensiun 2026–2028</div>
+      <div class="panel-sub">Klik baris untuk detail lengkap — diurutkan berdasarkan tahun pensiun terdekat</div>
+      <div id="sdmPensiunEmptyState" style="display:none; text-align:center; padding:24px; color:var(--text-faint); font-size:13px;">Belum ada data pensiun yang bisa ditampilkan.</div>
+      <div id="sdmPensiunTableWrap" class="table-scroll" style="display:none; overflow-x:auto;">
+        <table>
+          <thead><tr><th>Nama</th><th>Tanggal Pensiun</th><th>Golongan</th><th>Unit Kerja</th><th>Masa Kerja</th><th>Status</th></tr></thead>
+          <tbody id="sdmPensiunBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== KEUANGAN ===================== -->
+  <div class="view" id="keuangan">
+    <div class="section-head">
+      <div class="eyebrow">Keuangan</div>
+      <h1 class="page-title">Dokumen SPM &amp; SPBY <span class="pill amber" style="font-size:12px; vertical-align:middle; margin-left:6px;">DATA TAHUN 2026</span></h1>
+      <p class="page-desc">Rekap dokumen dibayarkan dan status pengarsipan — Surat Perintah Membayar (SPM) dan Surat Perintah Bayar (SPBY). Seluruh angka pada halaman ini adalah data tahun berjalan 2026.</p>
+    </div>
+
+    <div id="keuanganLoadingState" style="text-align:center; padding:24px; color:var(--text-faint); font-size:13px;">Memuat data keuangan dari spreadsheet...</div>
+
+    <div id="keuanganContent" style="display:none;">
+      <div class="stat-grid" style="grid-template-columns:repeat(5,1fr);">
+        <div class="card stat-card glass">
+          <div class="label">Total SPM <span>📄</span></div>
+          <div class="value" id="keuKpiTotalSpm">–</div>
+          <span class="delta flat">Dokumen Dibayarkan</span>
+        </div>
+        <div class="card stat-card glass">
+          <div class="label">Arsip SPM <span>🗂️</span></div>
+          <div class="value" id="keuKpiArsipSpmPct">–</div>
+          <div class="subvalue" id="keuKpiArsipSpmFrac">–</div>
+        </div>
+        <div class="card stat-card glass">
+          <div class="label">Total SPBY <span>📄</span></div>
+          <div class="value" id="keuKpiTotalSpby">–</div>
+          <span class="delta flat">Dokumen Dibayarkan</span>
+        </div>
+        <div class="card stat-card glass">
+          <div class="label">Arsip SPBY <span>🗂️</span></div>
+          <div class="value" id="keuKpiArsipSpbyPct">–</div>
+          <div class="subvalue" id="keuKpiArsipSpbyFrac">–</div>
+        </div>
+        <div class="card stat-card glass">
+          <div class="label">Belum Arsip <span>📭</span></div>
+          <div class="value" id="keuKpiBelumArsip">–</div>
+          <div class="subvalue" id="keuKpiBelumArsipDetail">–</div>
+        </div>
+      </div>
+
+      <div class="grid-2 grid-2-equal">
+        <div class="card glass">
+          <div class="panel-title">Dokumen SPM</div>
+          <div class="panel-sub">Dibayarkan vs Diarsipkan per Bulan</div>
+          <canvas id="chartKeuanganSpm"></canvas>
+        </div>
+        <div class="card glass">
+          <div class="panel-title">Dokumen SPBY</div>
+          <div class="panel-sub">Dibayarkan vs Diarsipkan per Bulan</div>
+          <canvas id="chartKeuanganSpby"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================== TRANSMISI ===================== -->
+  <div class="view" id="transmisi">
+    <div class="section-head">
+      <div class="eyebrow">Infrastruktur Siaran</div>
+      <h1 class="page-title">Data Transmisi &amp; Pemancar</h1>
+      <p class="page-desc">Kondisi jaringan, status site, dan data teknis pemancar TVRI Sumsel — langsung dari spreadsheet (sheet TRANSMISI).</p>
+    </div>
+
+    <div id="transmisiLoadingState" style="text-align:center; padding:24px; color:var(--text-faint); font-size:13px;">Memuat data Transmisi dari spreadsheet...</div>
+
+    <div id="transmisiContent" style="display:none;">
+
+      <div class="stat-grid stat-grid-5">
+        <div class="card stat-card glass">
+          <div class="label">Total Site <span>📡</span></div>
+          <div class="value" id="transKpiTotal">–</div>
+          <span class="delta flat">Seluruh Provinsi</span>
+        </div>
+        <div class="card stat-card glass">
+          <div class="label">Site Aktif <span>✅</span></div>
+          <div class="value" id="transKpiAktif">–</div>
+          <span class="delta flat">Beroperasi</span>
+        </div>
+        <div class="card stat-card glass">
+          <div class="label">Site Tidak Aktif <span>⛔</span></div>
+          <div class="value" id="transKpiNonaktif">–</div>
+          <span class="delta flat">Tidak Beroperasi</span>
+        </div>
+        <div class="card stat-card glass">
+          <div class="label">Mitra MUX Unik <span>🤝</span></div>
+          <div class="value" id="transKpiMitra">–</div>
+          <span class="delta flat">Seluruh Site</span>
+        </div>
+        <div class="card stat-card glass">
+          <div class="label">Slot MUX <span>📶</span></div>
+          <div class="value" id="transKpiSlot">–</div>
+          <span class="delta flat" id="transKpiSlotSub">–</span>
+        </div>
+      </div>
+
+      <div class="map-wrap glass">
+        <div class="panel-title">Peta Sebaran Pemancar — Provinsi Sumatera Selatan</div>
+        <div class="panel-sub">Klik marker untuk melihat data transmisinya</div>
+        <div id="mapPemancar"></div>
+        <div class="map-legend">
+          <div class="item"><span class="swatch" style="background:var(--cyan);"></span> Aktif</div>
+          <div class="item"><span class="swatch" style="background:var(--coral);"></span> Tidak Aktif</div>
+        </div>
+      </div>
+
+      <div class="card glass" style="margin-top:16px;">
+        <div class="panel-title">Grafik Analisis Transmisi</div>
+        <div class="panel-sub">Pilih data yang ingin ditampilkan per site</div>
+        <div class="filter-row" id="transmisiFilterRow">
+          <div class="filter-chip active" data-key="STATUS">STATUS</div>
+          <div class="filter-chip" data-key="BASE_POWER">BASE POWER</div>
+          <div class="filter-chip" data-key="TINGGI_TOWER">TINGGI TOWER</div>
+          <div class="filter-chip" data-key="MITRA_MUX">MITRA MUX</div>
+          <div class="filter-chip" data-key="OPERATOR">OPERATOR</div>
+        </div>
+        <canvas id="chartTransmisi"></canvas>
+      </div>
+
+      <div id="transmisiSiteCards" style="margin-top:16px;"></div>
+
+    </div>
+  </div>
+
+  <div class="footer-note">DASHBOARD TVRI SUMATERA SELATAN</div>
+</main>
+
+<div class="credit-watermark">rdytvriss</div>
+
+<div class="modal-overlay" id="dispoModalOverlay">
+  <div class="modal-box glass">
+    <button class="modal-close" id="dispoModalCloseBtn">✕</button>
+    <div class="panel-title" id="detailModalTitle">Detail Disposisi</div>
+    <div class="panel-sub">Kolom yang tidak tersedia pada sumber data tidak ditampilkan</div>
+    <div id="dispoModalContent"></div>
+  </div>
+</div>
+
+<script>
+const root = document.documentElement;
+const knob = document.getElementById('knob');
+document.getElementById('themeToggle').addEventListener('click', ()=>{
+  root.classList.toggle('light');
+  knob.textContent = root.classList.contains('light') ? '☀️' : '🌙';
+  rebuildAllCharts();
+  if(mapInitialized) setMapTheme();
+  if(umumLoaded) renderUmumCharts();
+  if(sdmLoaded) renderSdmCharts();
+  if(keuanganLoaded) renderKeuanganCharts();
+  if(bmnLoaded) renderBmnCharts();
+});
+
+/* ======================================================================
+   KONEKSI KE GOOGLE SHEETS (via Apps Script Web App)
+   ------------------------------------------------------------------------
+   1. Buat Apps Script di spreadsheet Anda (Extensions > Apps Script),
+      deploy sebagai Web App dengan akses "Anyone".
+   2. Tempel URL Web App hasil deploy ke variabel API_URL di bawah ini.
+   3. Setelah diisi dan file ini di-upload ulang ke Netlify, badge di
+      pojok kanan atas akan berubah otomatis (memakai ?action=ping,
+      jadi TIDAK bergantung pada nama sheet tertentu):
+        - "DATA CONTOH"     -> API_URL masih kosong
+        - "TERHUBUNG API"   -> berhasil ping ke Apps Script Web App
+        - "GAGAL KONEKSI"   -> URL salah / belum di-deploy dengan benar
+   4. Gunakan fetchSheetData('NAMA_SHEET') di bagian lain script untuk
+      mengambil data sheet KMB, SDM, BMN, dst dan mengisi KPI/chart dengan data asli.
+   ====================================================================== */
+const API_URL = 'https://script.google.com/macros/s/AKfycbzM6KT1l2Pwb87WYRyNcp6AnsVynV9ApD0YEvcDO1rRj8A1AMf5OgrrnQzYpEA3WQ1Z6Q/exec'; // <-- TEMPEL URL WEB APP APPS SCRIPT DI SINI, contoh: 'https://script.google.com/macros/s/AKfycb.../exec'
+
+/* ======================================================================
+   SISTEM LOGIN
+   ------------------------------------------------------------------------
+   - Token didapat dari Apps Script (?action=login lewat POST) setelah
+     username & password cocok dengan sheet USERS.
+   - Token disimpan di sessionStorage (hilang otomatis saat tab ditutup,
+     TIDAK ikut tersimpan permanen di browser seperti localStorage).
+   - Setiap request data (fetchJsonWithRetry) otomatis menyisipkan token ini
+     -- kalau Apps Script menolaknya (kedaluwarsa/tidak valid), pengguna
+     dikembalikan ke layar login. action=ping dikecualikan supaya badge
+     status koneksi tetap bisa dicek sebelum login.
+   ====================================================================== */
+let authToken = sessionStorage.getItem('tvri_token') || null;
+
+function showLogin(message){
+  document.getElementById('loginOverlay').classList.remove('hidden');
+  const err = document.getElementById('loginError');
+  if(message){ err.textContent = message; err.classList.add('show'); }
+  else { err.classList.remove('show'); err.textContent = ''; }
+}
+function hideLogin(){
+  document.getElementById('loginOverlay').classList.add('hidden');
+}
+function logout(){
+  authToken = null;
+  sessionStorage.removeItem('tvri_token');
+  location.reload();
+}
+document.getElementById('logoutBtn').addEventListener('click', logout);
+
+document.getElementById('loginForm').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const btn = document.getElementById('loginBtn');
+  const username = document.getElementById('loginUsername').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  if(!username || !password) return;
+  btn.disabled = true; btn.textContent = 'Memeriksa...';
+  try{
+    // Content-Type: text/plain sengaja dipakai (bukan application/json) supaya
+    // browser TIDAK mengirim preflight OPTIONS -- Apps Script Web App tidak
+    // menangani OPTIONS secara default sehingga preflight akan gagal.
+    const res = await fetch(API_URL, {
+      method:'POST',
+      headers:{ 'Content-Type':'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action:'login', username, password })
+    });
+    const json = await res.json();
+    if(json.error || !json.token) throw new Error(json.error || 'LOGIN_GAGAL');
+    authToken = json.token;
+    sessionStorage.setItem('tvri_token', authToken);
+    hideLogin();
+    startDashboardData();
+  }catch(err){
+    const pesan = err.message === 'INVALID_CREDENTIALS'
+      ? 'Username atau password salah.'
+      : 'Gagal login, periksa koneksi lalu coba lagi.';
+    showLogin(pesan);
+  }finally{
+    btn.disabled = false; btn.textContent = 'Masuk';
+  }
+});
+
+// Apps Script Web App kadang gagal sesaat (404/500) kalau menerima beberapa
+// request bersamaan dalam waktu berdekatan — bukan berarti URL/deploy salah.
+// Helper ini otomatis mencoba ulang beberapa kali sebelum benar-benar dianggap gagal.
+async function fetchJsonWithRetry(url, retries = 2, delayMs = 700){
+  let lastErr;
+  // action=ping dikecualikan dari token supaya badge status koneksi tetap
+  // bisa dicek sebelum pengguna login.
+  const withToken = url.includes('action=ping')
+    ? url
+    : url + (url.includes('?') ? '&' : '?') + 'token=' + encodeURIComponent(authToken || '');
+  for(let attempt = 0; attempt <= retries; attempt++){
+    try{
+      // cache:'no-store' + parameter unik supaya browser TIDAK PERNAH menyajikan
+      // ulang respons lama (mis. pesan error dari sebelum Apps Script di-redeploy).
+      const bustedUrl = withToken + (withToken.includes('?') ? '&' : '?') + '_ts=' + Date.now();
+      const res = await fetch(bustedUrl, { cache: 'no-store' });
+      if(!res.ok) throw new Error('HTTP ' + res.status);
+      const json = await res.json();
+      if(json.error === 'UNAUTHORIZED'){
+        sessionStorage.removeItem('tvri_token');
+        authToken = null;
+        showLogin('Sesi berakhir, silakan masuk kembali.');
+        throw new Error('UNAUTHORIZED');
+      }
+      if(json.error) throw new Error(json.error);
+      return json;
+    }catch(err){
+      lastErr = err;
+      if(err.message === 'UNAUTHORIZED') break; // sesi habis -> jangan diulang otomatis
+      if(attempt < retries){
+        console.warn(`[API] Percobaan ${attempt + 1} gagal (${err.message}), mencoba lagi...`, url);
+        await new Promise(r => setTimeout(r, delayMs * (attempt + 1)));
+      }
+    }
+  }
+  throw lastErr;
+}
+
+async function fetchSheetData(sheetName, source){
+  if(!API_URL) throw new Error('API_URL belum diisi');
+  const src = source || 'MASTER';
+  const json = await fetchJsonWithRetry(`${API_URL}?source=${encodeURIComponent(src)}&sheet=${encodeURIComponent(sheetName)}`);
+  return json.data; // array of row objects, key = nama kolom header di sheet
+}
+
+// Directory pegawai SDM yang SUDAH digabung dengan unit kerja di sisi server
+// (Apps Script) — NIP tidak pernah dikirim, cukup panggil aksi khusus ini.
+async function fetchSdmDirectory(){
+  if(!API_URL) throw new Error('API_URL belum diisi');
+  const json = await fetchJsonWithRetry(`${API_URL}?action=sdm_directory`);
+  return json.data;
+}
+
+// Data sheet KEUANGAN (tabel SPM & SPBY yang berdampingan) sudah dipisah dan
+// dinormalisasi di sisi server (Apps Script) -> { spm:{monthly,total}, spby:{monthly,total} }.
+async function fetchKeuanganData(){
+  if(!API_URL) throw new Error('API_URL belum diisi');
+  return await fetchJsonWithRetry(`${API_URL}?action=keuangan_data`);
+}
+
+// Data gabungan 3 sheet BMN (Penghapusan, PSP & Pemanfaatan, Jadwal) sudah
+// dipisah dan dinormalisasi di sisi server (Apps Script). Sheet
+// BMN_Dashboard & Summary TIDAK dipakai -- KPI dihitung ulang di frontend
+// dari data mentah ini supaya tidak ada dua sumber angka yang bisa beda.
+async function fetchBmnData(){
+  if(!API_URL) throw new Error('API_URL belum diisi');
+  return await fetchJsonWithRetry(`${API_URL}?action=bmn_data`);
+}
+
+// Data sheet KMB_SOSMED (followers/subscriber per platform per bulan) sudah
+// dinormalisasi di sisi server (Apps Script) -> { monthly:[...], latest, previous }.
+// totalFollowers dihitung di server supaya Tab KMB dan KPI "Total Followers"
+// di Beranda selalu memakai satu sumber angka yang sama.
+async function fetchKmbData(){
+  if(!API_URL) throw new Error('API_URL belum diisi');
+  return await fetchJsonWithRetry(`${API_URL}?action=kmb_data`);
+}
+
+// Data sheet TRANSMISI (site pemancar) sudah dinormalisasi di sisi server
+// (Apps Script) -> { sites:[...], totalMitraUnik, daftarMitraUnik }.
+// NAMA PETUGAS TIDAK PERNAH dikirim mentah oleh server, hanya jumlahOperator.
+async function fetchTransmisiData(){
+  if(!API_URL) throw new Error('API_URL belum diisi');
+  return await fetchJsonWithRetry(`${API_URL}?action=transmisi_data`);
+}
+
+async function testKoneksiAPI(){
+  const badge = document.getElementById('connStatus');
+  if(!API_URL){
+    badge.innerHTML = '<span class="dot" style="background:var(--text-faint); animation:none;"></span> DATA CONTOH';
+    return;
+  }
+  try{
+    const res = await fetch(`${API_URL}?action=ping&_ts=${Date.now()}`, { cache: 'no-store' });
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const json = await res.json();
+    if(json.error) throw new Error(json.error);
+    console.log('[API] Terhubung. Daftar sheet tersedia:', json.sheets);
+    badge.innerHTML = '<span class="dot"></span> TERHUBUNG API';
+    badge.style.color = 'var(--mint)';
+    badge.style.borderColor = 'color-mix(in srgb, var(--mint) 40%, transparent)';
+    badge.style.background = 'color-mix(in srgb, var(--mint) 14%, transparent)';
+  }catch(err){
+    console.error('[API] Gagal konek ke API:', err);
+    badge.innerHTML = '<span class="dot" style="background:var(--coral); animation:none;"></span> GAGAL KONEKSI';
+    badge.style.color = 'var(--coral)';
+    badge.style.borderColor = 'color-mix(in srgb, var(--coral) 40%, transparent)';
+    badge.style.background = 'color-mix(in srgb, var(--coral) 14%, transparent)';
+  }
+}
+testKoneksiAPI();
+
+/* ======================================================================
+   TAB UMUM — Disposisi Tata Usaha
+   Sumber: 3 sheet terpisah di spreadsheet (kolom beda-beda), digabung
+   jadi satu kesatuan data disposisi di sisi dashboard.
+   ====================================================================== */
+let umumAllData = [];      // gabungan data ternormalisasi dari 3 sheet
+let umumLoaded = false;    // supaya fetch hanya sekali per sesi
+let umumFilterKey = 'SEMUA';
+let umumSearchQuery = '';
+let umumSearchField = 'SEMUA'; // SEMUA | nomorDispo | nomorSurat | suratDari | perihal
+let umumDateFilter = '';       // format yyyy-mm-dd (dari <input type="date">), kosong = tidak difilter
+let umumCounts = { eks:0, internal:0 };
+let chartDispoKomposisi = null;
+
+/* --------------------------------------------------------------------
+   Resolver nama kolom fleksibel — mengatasi header yang beda-beda antar
+   sheet (mis. sheet Eksternal pakai "TGL DISPO TU", sheet Internal cuma
+   "TGL DISPO"). Pencocokan tidak peduli huruf besar/kecil & spasi.
+   -------------------------------------------------------------------- */
+const UMUM_FIELD_ALIASES = {
+  nomorDispo:       ['Nomor Dispo TU', 'No Dispo TU', 'Nomor Dispo'],
+  tglDispo:         ['TGL Dispo TU', 'TGL Dispo', 'Tanggal Dispo TU', 'Tanggal Dispo'],
+  tglAgenda:        ['TGL Agenda Kepsta', 'TGL Agenda', 'Tanggal Agenda Kepsta', 'Tanggal Agenda'],
+  suratDariPenerus: ['Surat dari Penerus ke Kepsta', 'Surat Dari Penerus ke Kepsta'],
+  dasarSurat:       ['Dasar Surat'],
+  suratDari:        ['Surat Dari'],
+  noAgendaKepsta:   ['No Agenda Kepsta', 'No Agenda'],
+  nomorSurat:       ['Nomor Surat'],
+  perihal:          ['Perihal'],
+};
+
+const BULAN_ID_MAP = {
+  'januari':1,'februari':2,'maret':3,'april':4,'mei':5,'juni':6,
+  'juli':7,'agustus':8,'september':9,'oktober':10,'november':11,'desember':12
+};
+function pad2(n){ return String(n).padStart(2,'0'); }
+
+// Sumber data Tgl Dispo di spreadsheet belum dinormalisasi -- bisa berupa
+// ISO ("2026-03-15T00:00:00.000Z"), "15/03/2026", "15-3-26", atau
+// "15 Maret 2026". Fungsi ini menyeragamkan semuanya jadi tampilan DD-MM-YYYY
+// dan sekaligus menghasilkan versi ISO (yyyy-mm-dd) untuk keperluan filter
+// tanggal. Kalau polanya tidak dikenali, teks aslinya ditampilkan apa adanya
+// (tidak dikarang) dan tidak bisa dipakai untuk filter tanggal (iso:null).
+function parseTanggalUmum(raw){
+  if(!raw) return { display:'-', iso:null };
+  const str = String(raw).trim();
+  if(!str) return { display:'-', iso:null };
+
+  let m = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(m){
+    const [, yyyy, mm, dd] = m;
+    return { display:`${dd}-${mm}-${yyyy}`, iso:`${yyyy}-${mm}-${dd}` };
+  }
+
+  m = str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+  if(m){
+    let [, dd, mm, yyyy] = m;
+    if(yyyy.length === 2) yyyy = (Number(yyyy) < 50 ? '20' : '19') + yyyy;
+    dd = pad2(dd); mm = pad2(mm);
+    return { display:`${dd}-${mm}-${yyyy}`, iso:`${yyyy}-${mm}-${dd}` };
+  }
+
+  m = str.toLowerCase().match(/^(\d{1,2})\s+([a-z]+)\s+(\d{4})$/);
+  if(m && BULAN_ID_MAP[m[2]]){
+    const dd = pad2(m[1]), mm = pad2(BULAN_ID_MAP[m[2]]), yyyy = m[3];
+    return { display:`${dd}-${mm}-${yyyy}`, iso:`${yyyy}-${mm}-${dd}` };
+  }
+
+  const d = new Date(str);
+  if(!isNaN(d.getTime())){
+    const dd = pad2(d.getDate()), mm = pad2(d.getMonth()+1), yyyy = d.getFullYear();
+    return { display:`${dd}-${mm}-${yyyy}`, iso:`${yyyy}-${mm}-${dd}` };
+  }
+
+  return { display:str, iso:null };
+}
+
+function normalizeHeaderText(h){
+  return String(h ?? '').trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+// Versi "squash" — buang semua spasi/titik/garis miring. Menolong kasus
+// header ditulis tanpa spasi sama sekali, mis. "MASAKERJA" vs "Masa Kerja".
+function squashHeaderText(h){
+  return normalizeHeaderText(h).replace(/[\s./\\-]/g, '');
+}
+
+// Resolver kolom generik — dipakai untuk UMUM (disposisi) maupun SDM (pensiun),
+// karena keduanya menghadapi masalah yang sama: nama kolom bisa beda-beda
+// walau maknanya sama.
+function buildFieldKeyMap(sampleRawRow, aliasesMap){
+  const rawHeaders = Object.keys(sampleRawRow);
+  const normToActual = {};
+  rawHeaders.forEach(k => { normToActual[normalizeHeaderText(k)] = k; });
+  const keyMap = {};
+  Object.entries(aliasesMap).forEach(([field, candidates]) => {
+    let foundKey = null;
+    // 1) cocok persis (setelah normalisasi)
+    for(const cand of candidates){
+      const actual = normToActual[normalizeHeaderText(cand)];
+      if(actual !== undefined){ foundKey = actual; break; }
+    }
+    // 2) fallback: header yang MENGANDUNG salah satu alias sebagai bagian teks
+    //    (menolong kasus nama kolom sedikit berbeda, mis. "Golongan / Ruang")
+    if(!foundKey){
+      for(const cand of candidates){
+        const normCand = normalizeHeaderText(cand);
+        const match = rawHeaders.find(h => normalizeHeaderText(h).includes(normCand));
+        if(match){ foundKey = match; break; }
+      }
+    }
+    // 3) fallback terakhir: cocokkan tanpa spasi/tanda baca sama sekali
+    //    (menolong header seperti "MASAKERJA" yang ditulis tanpa spasi)
+    if(!foundKey){
+      for(const cand of candidates){
+        const sq = squashHeaderText(cand);
+        const match = rawHeaders.find(h => {
+          const hSq = squashHeaderText(h);
+          return hSq === sq || hSq.includes(sq) || sq.includes(hSq);
+        });
+        if(match){ foundKey = match; break; }
+      }
+    }
+    keyMap[field] = foundKey; // null = kolom ini memang tidak ada di sheet ini
+  });
+  return keyMap;
+}
+
+function mapRowsToUmum(rawRows, jenis){
+  if(!rawRows || rawRows.length === 0) return [];
+  // Header (nama kolom) sama untuk semua baris, jadi aman diambil dari baris pertama
+  // walau baris itu sendiri kosong — ini cuma dipakai untuk mencocokkan nama kolom.
+  const keyMap = buildFieldKeyMap(rawRows[0], UMUM_FIELD_ALIASES);
+  const get = (raw, field) => {
+    const k = keyMap[field];
+    const v = k ? raw[k] : undefined;
+    return (v === null || v === undefined) ? '' : String(v).trim();
+  };
+  const isSubstantive = (raw) => {
+    return get(raw,'perihal') !== '' || get(raw,'suratDari') !== '' || get(raw,'nomorSurat') !== '';
+  };
+  const filled = rawRows.filter(isSubstantive);
+  return filled.map(raw => {
+    const tglDispoParsed = parseTanggalUmum(get(raw,'tglDispo'));
+    return {
+      jenis,
+      nomorDispo: get(raw,'nomorDispo'),
+      tglDispo: tglDispoParsed.display,   // sudah dirapikan & diseragamkan (DD-MM-YYYY)
+      tglDispoISO: tglDispoParsed.iso,    // null kalau formatnya tidak dikenali -> tidak ikut filter tanggal
+      tglAgenda: get(raw,'tglAgenda'),
+      suratDariPenerus: get(raw,'suratDariPenerus'),
+      dasarSurat: get(raw,'dasarSurat'),
+      suratDari: get(raw,'suratDari'),
+      noAgendaKepsta: get(raw,'noAgendaKepsta'),
+      nomorSurat: get(raw,'nomorSurat'),
+      perihal: get(raw,'perihal'),
+    };
+  });
+}
+
+let umumLoadStarted = false;
+async function loadUmumData(){
+  if(umumLoadStarted) return;
+  umumLoadStarted = true;
+  const loadingEl = document.getElementById('umumLoadingState');
+  const emptyEl = document.getElementById('umumEmptyState');
+  const wrapEl = document.getElementById('umumTableWrap');
+  loadingEl.style.display = 'block';
+  loadingEl.textContent = 'Memuat data disposisi dari spreadsheet...';
+  emptyEl.style.display = 'none';
+  wrapEl.style.display = 'none';
+  try{
+    const [eksRaw, int1Raw, int2Raw] = await Promise.all([
+      fetchSheetData('UMUM_DISPOEKSTERNAL'),
+      fetchSheetData('UMUM_DISPOINTERNAL'),
+      fetchSheetData('UMUM_DISPOINTERNAL2'),
+    ]);
+    const eks = mapRowsToUmum(eksRaw, 'Eksternal');
+    const int1 = mapRowsToUmum(int1Raw, 'Internal');
+    const int2 = mapRowsToUmum(int2Raw, 'Internal'); // digabung jadi satu jenis "Internal" (tanpa pemisahan sheet)
+    umumAllData = [...eks, ...int1, ...int2];
+    umumCounts = { eks: eks.length, internal: int1.length + int2.length };
+    umumLoaded = true;
+    console.log('[UMUM] Data terisi (setelah baris kosong disaring):', umumCounts);
+    updateBerandaFromUmum();
+    renderUmumKPI();
+    renderUmumCharts();
+    renderUmumTable();
+  }catch(err){
+    console.error('[UMUM] Gagal memuat data disposisi:', err);
+    loadingEl.textContent = 'Gagal memuat data. Pastikan API_URL sudah diisi dan nama sheet persis: UMUM_DISPOEKSTERNAL, UMUM_DISPOINTERNAL, UMUM_DISPOINTERNAL2. Detail error ada di console (F12).';
+    umumLoadStarted = false;
+  }
+}
+
+function renderUmumKPI(){
+  document.getElementById('umumLoadingState').style.display = 'none';
+  const total = umumCounts.eks + umumCounts.internal;
+  document.getElementById('umumKpiTotal').textContent = total.toLocaleString('id-ID');
+  document.getElementById('umumKpiInternal').textContent = umumCounts.internal.toLocaleString('id-ID');
+  document.getElementById('umumKpiEksternal').textContent = umumCounts.eks.toLocaleString('id-ID');
+}
+
+// Menyalurkan total disposisi (data asli, sama dengan Tab Umum) ke kartu KPI di Beranda.
+function updateBerandaFromUmum(){
+  const el = document.getElementById('berandaKpiDisposisi');
+  if(el) el.textContent = (umumCounts.eks + umumCounts.internal).toLocaleString('id-ID');
+}
+
+function renderUmumCharts(){
+  const CYAN = cssVar('--cyan'), VIOLET = cssVar('--violet'), TXTDIM = cssVar('--text-dim');
+
+  const elK = document.getElementById('chartDispoKomposisi');
+  if(elK){
+    if(chartDispoKomposisi){ chartDispoKomposisi.destroy(); chartInstances = chartInstances.filter(c=>c!==chartDispoKomposisi); }
+    chartDispoKomposisi = new Chart(elK, { type:'doughnut',
+      data:{ labels:['Internal','Eksternal'], datasets:[{ data:[umumCounts.internal, umumCounts.eks], backgroundColor:[VIOLET,CYAN], borderWidth:0 }] },
+      options:{ plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10, padding:14, color:TXTDIM } } }, cutout:'62%' }
+    });
+    chartInstances.push(chartDispoKomposisi);
+  }
+}
+
+function getFilteredUmumData(){
+  let data = umumAllData;
+  if(umumFilterKey === 'INTERNAL') data = data.filter(d => d.jenis === 'Internal');
+  else if(umumFilterKey === 'EKSTERNAL') data = data.filter(d => d.jenis === 'Eksternal');
+
+  const q = umumSearchQuery.trim().toLowerCase();
+  if(q){
+    if(umumSearchField === 'SEMUA'){
+      data = data.filter(d =>
+        String(d.nomorSurat).toLowerCase().includes(q) ||
+        String(d.nomorDispo).toLowerCase().includes(q) ||
+        String(d.suratDari).toLowerCase().includes(q) ||
+        String(d.perihal).toLowerCase().includes(q)
+      );
+    } else {
+      // Pencarian di-scope HANYA ke kolom yang dipilih -- mis. cari "1" di
+      // No Dispo tidak lagi ikut mencocokkan angka "1" yang ada di Perihal/No Surat.
+      data = data.filter(d => String(d[umumSearchField] || '').toLowerCase().includes(q));
+    }
+  }
+
+  if(umumDateFilter){
+    data = data.filter(d => d.tglDispoISO === umumDateFilter);
+  }
+
+  return data;
+}
+
+const UMUM_MAX_ROWS = 200; // batasi baris yang dirender sekaligus agar tabel tetap ringan
+function renderUmumTable(){
+  const data = getFilteredUmumData();
+  const tbody = document.getElementById('umumResultsBody');
+  const wrapEl = document.getElementById('umumTableWrap');
+  const emptyEl = document.getElementById('umumEmptyState');
+
+  if(data.length === 0){
+    tbody.innerHTML = '';
+    wrapEl.style.display = 'none';
+    emptyEl.style.display = 'block';
+    return;
+  }
+  wrapEl.style.display = 'block';
+  emptyEl.style.display = 'none';
+
+  const shown = data.slice(0, UMUM_MAX_ROWS);
+  let rowsHtml = shown.map(d => {
+    const pillClass = d.jenis === 'Eksternal' ? 'blue' : 'violet';
+    const idx = umumAllData.indexOf(d);
+    return `<tr class="umum-row" data-idx="${idx}">
+      <td><span class="pill ${pillClass}">${d.jenis}</span></td>
+      <td class="mono">${d.nomorDispo || '-'}</td>
+      <td class="mono">${d.tglDispo || '-'}</td>
+      <td>${d.suratDari || '-'}</td>
+      <td class="mono">${d.nomorSurat || '-'}</td>
+    </tr>`;
+  }).join('');
+  if(data.length > UMUM_MAX_ROWS){
+    rowsHtml += `<tr><td colspan="5" style="text-align:center; color:var(--text-faint); font-size:11.5px; padding-top:14px;">Menampilkan ${UMUM_MAX_ROWS} dari ${data.length} hasil — persempit pencarian untuk hasil lebih spesifik.</td></tr>`;
+  }
+  tbody.innerHTML = rowsHtml;
+}
+
+document.querySelectorAll('#umumFilterRow .filter-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('#umumFilterRow .filter-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    umumFilterKey = chip.dataset.key;
+    renderUmumTable();
+  });
+});
+document.getElementById('umumSearchInput').addEventListener('input', (e) => {
+  umumSearchQuery = e.target.value;
+  renderUmumTable();
+});
+document.getElementById('umumSearchField').addEventListener('change', (e) => {
+  umumSearchField = e.target.value;
+  renderUmumTable();
+});
+document.getElementById('umumDateFilter').addEventListener('change', (e) => {
+  umumDateFilter = e.target.value;
+  renderUmumTable();
+});
+
+// Event delegation untuk klik baris tabel -> buka detail
+document.getElementById('umumResultsBody').addEventListener('click', (e) => {
+  const tr = e.target.closest('tr.umum-row');
+  if(!tr) return;
+  const idx = parseInt(tr.dataset.idx, 10);
+  openDispoDetail(umumAllData[idx]);
+});
+
+// Modal detail generik — dipakai untuk detail disposisi (UMUM) dan detail
+// proyeksi pensiun (SDM). Hanya field yang benar-benar terisi yang ditampilkan.
+function openDetailModal(title, fields){
+  document.getElementById('detailModalTitle').textContent = title;
+  const shown = fields.filter(([_, v]) => v !== '' && v !== undefined && v !== null);
+  document.getElementById('dispoModalContent').innerHTML = shown.map(([k,v]) =>
+    `<div class="detail-row"><span class="dk">${k}</span><span class="dv">${v}</span></div>`
+  ).join('');
+  document.getElementById('dispoModalOverlay').classList.add('active');
+}
+
+function openDispoDetail(d){
+  if(!d) return;
+  openDetailModal('Detail Disposisi', [
+    ['Jenis', d.jenis],
+    ['Nomor Dispo TU', d.nomorDispo],
+    ['TGL Dispo TU', d.tglDispo],
+    ['TGL Agenda Kepsta', d.tglAgenda],
+    ['Surat dari Penerus ke Kepsta', d.suratDariPenerus],
+    ['Dasar Surat', d.dasarSurat],
+    ['Surat Dari', d.suratDari],
+    ['No Agenda Kepsta', d.noAgendaKepsta],
+    ['Nomor Surat', d.nomorSurat],
+    ['Perihal', d.perihal],
+  ]);
+}
+function closeDispoModal(){
+  document.getElementById('dispoModalOverlay').classList.remove('active');
+}
+document.getElementById('dispoModalCloseBtn').addEventListener('click', closeDispoModal);
+document.getElementById('dispoModalOverlay').addEventListener('click', (e) => {
+  if(e.target.id === 'dispoModalOverlay') closeDispoModal();
+});
+
+/* ======================================================================
+   TAB SDM — Kepegawaian
+   sdmDirectory  : hasil join Data Pegawai + 7 unit kerja (dari Apps Script,
+                   NIP/No HP/Email/Tanggal Lahir tidak pernah dikirim)
+   sdmPensiunList: daftar pegawai pensiun 2026-2028
+   ====================================================================== */
+let sdmDirectory = [];
+let sdmPensiunList = [];
+let sdmLoaded = false;
+
+const PENSIUN_FIELD_ALIASES = {
+  nama: ['Nama'],
+  jabatan: ['Jabatan TMT', 'Jabatan'],
+  golongan: ['Gol.TMT', 'Gol TMT', 'Golongan', 'Golongan/Ruang', 'Golongan / Ruang', 'Gol/Ruang', 'Gol'],
+  masaKerja: ['Masa Kerja', 'Masa Kerja (Tahun)', 'Masa Kerja Tahun'],
+  tmtPensiun: ['TMT Pensiun', 'TMTPENSIUN', 'TMT PENSIUN'],
+  unitKerja: ['Unit Kerja', 'UNIT KERJA'],
+};
+
+function mapRowsToPensiun(rawRows){
+  if(!rawRows || rawRows.length === 0) return [];
+  const keyMap = buildFieldKeyMap(rawRows[0], PENSIUN_FIELD_ALIASES);
+  const get = (raw, field) => {
+    const k = keyMap[field];
+    const v = k ? raw[k] : undefined;
+    return (v === null || v === undefined) ? '' : String(v).trim();
+  };
+  return rawRows
+    .filter(raw => get(raw,'nama') !== '') // baris tanpa nama dianggap kosong
+    .map(raw => ({
+      nama: get(raw,'nama'),
+      jabatan: get(raw,'jabatan'),
+      golongan: get(raw,'golongan'),
+      masaKerja: get(raw,'masaKerja'),
+      tmtPensiunRaw: get(raw,'tmtPensiun'),
+      tmtPensiunTahun: extractYear(get(raw,'tmtPensiun')),
+      unitKerja: get(raw,'unitKerja'),
+    }))
+    .sort((a,b) => (a.tmtPensiunTahun || 9999) - (b.tmtPensiunTahun || 9999));
+}
+
+function extractYear(val){
+  if(!val) return null;
+  const match = String(val).match(/(20\d{2})/);
+  return match ? parseInt(match[1], 10) : null;
+}
+
+function pensiunBadge(tahun){
+  if(tahun === 2026) return { label:'2026 · Segera', cls:'red' };
+  if(tahun === 2027) return { label:'2027 · Dekat', cls:'amber' };
+  if(tahun === 2028) return { label:'2028 · Direncanakan', cls:'blue' };
+  return { label: tahun ? String(tahun) : '-', cls:'violet' };
+}
+
+// Beberapa tanggal dari Apps Script bocor sebagai string ISO lengkap dengan
+// jam (mis. "2026-03-15T00:00:00.000Z") karena aslinya adalah objek Date di
+// Google Sheets. Fungsi ini merapikannya jadi DD-MM-YYYY tanpa jam; kalau
+// nilainya bukan pola tanggal ISO (mis. cuma "2026" polos), ditampilkan apa
+// adanya.
+function formatTanggalPensiun(raw){
+  if(!raw) return '-';
+  const str = String(raw).trim();
+  if(!str) return '-';
+  const isoMatch = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(isoMatch){
+    const [, yyyy, mm, dd] = isoMatch;
+    return `${dd}-${mm}-${yyyy}`;
+  }
+  return str;
+}
+
+function usiaToGenerasi(usiaVal){
+  const n = parseInt(usiaVal, 10);
+  if(isNaN(n)) return null;
+  if(n <= 29) return 'Gen Z';
+  if(n <= 45) return 'Milenial';
+  if(n <= 61) return 'Gen X';
+  return 'Baby Boomer';
+}
+function usiaToBucket(usiaVal){
+  const n = parseInt(usiaVal, 10);
+  if(isNaN(n)) return null;
+  if(n <= 30) return '20–30';
+  if(n <= 40) return '31–40';
+  if(n <= 50) return '41–50';
+  if(n <= 60) return '51–60';
+  return '>60';
+}
+function golonganMajor(golVal){
+  if(!golVal) return null;
+  const match = String(golVal).trim().match(/^(IV|III|II|I)\b/i);
+  return match ? match[1].toUpperCase() : 'Lainnya';
+}
+// Konversi angka Romawi (I..XVII cukup) ke integer.
+function romanToInt(str){
+  if(!str) return null;
+  const map = { I:1, V:5, X:10, L:50, C:100, D:500, M:1000 };
+  const s = String(str).trim().toUpperCase();
+  if(!s || !/^[IVXLCDM]+$/.test(s)) return null;
+  let total = 0;
+  for(let i=0;i<s.length;i++){
+    const cur = map[s[i]];
+    const next = map[s[i+1]];
+    total += (next !== undefined && cur < next) ? -cur : cur;
+  }
+  return total > 0 ? total : null;
+}
+// Ambil token angka Romawi di awal nilai Golongan, mengabaikan sub-huruf
+// PNS seperti "/a" pada "IV/a" (a/b/c/d bukan huruf Romawi jadi otomatis
+// tidak ikut ke-capture).
+function extractGolonganToken(golVal){
+  if(!golVal) return null;
+  const match = String(golVal).trim().match(/^([IVXLCDM]+)/i);
+  return match ? match[1].toUpperCase() : null;
+}
+// Kolom "Golongan" menampung dua jenis data berbeda tergantung status pegawai:
+// PNS pakai Golongan I–IV, PPPK pakai Grade — KEDUANYA ditulis dalam angka
+// Romawi (Grade PPPK bukan angka arab 1-17, tapi tetap I-XVII). Diklasifikasi
+// berdasarkan NILAI angka Romawi-nya (1-4 = PNS, 5-17 = PPPK), bukan dari
+// pola teks semata, supaya tidak salah kelompok.
+function golonganStatus(golVal){
+  const token = extractGolonganToken(golVal);
+  if(!token) return null;
+  const n = romanToInt(token);
+  if(n === null) return null;
+  if(n >= 1 && n <= 4) return 'PNS';
+  if(n >= 5 && n <= 17) return 'PPPK';
+  return null;
+}
+function pppkGrade(golVal){
+  const token = extractGolonganToken(golVal);
+  if(!token) return null;
+  const n = romanToInt(token);
+  return (n !== null && n >= 5 && n <= 17) ? token : null;
+}
+
+// 2 pegawai kontrak ini tidak punya NIK sama sekali, sehingga tidak bisa
+// dicocokkan otomatis ke unit kerja lewat NIP seperti pegawai lainnya —
+// unit kerjanya di-set manual di sini.
+const SDM_UNIT_OVERRIDE_MANUAL = {
+  'adi gunawan': 'Berita',
+  'm rifqi': 'Teknik',
+};
+function normalizeNamaUntukOverride(nama){
+  return String(nama || '').trim().toLowerCase().replace(/\./g, '').replace(/\s+/g, ' ');
+}
+
+async function loadSdmData(){
+  const loadingEl = document.getElementById('sdmLoadingState');
+  loadingEl.style.display = 'block';
+  loadingEl.textContent = 'Memuat data kepegawaian dari spreadsheet...';
+  try{
+    const [directory, pensiunRaw] = await Promise.all([
+      fetchSdmDirectory(),
+      fetchSheetData('PENSIUN_2026_2028', 'SDM'),
+    ]);
+    sdmDirectory = (directory || []).map(p => {
+      let unit = (!p.unitKerja || p.unitKerja === 'Belum Diketahui') ? 'Lainnya' : p.unitKerja;
+      const override = SDM_UNIT_OVERRIDE_MANUAL[normalizeNamaUntukOverride(p.nama)];
+      if(override) unit = override;
+      return { ...p, unitKerja: unit };
+    });
+    sdmPensiunList = mapRowsToPensiun(pensiunRaw);
+    sdmLoaded = true;
+    loadingEl.style.display = 'none';
+    console.log('[SDM] Data pegawai:', sdmDirectory.length, '| Data pensiun:', sdmPensiunList.length);
+    renderSdmKPI();
+    renderSdmCharts();
+    renderSdmPensiunTable();
+    updateBerandaFromSdm();
+  }catch(err){
+    console.error('[SDM] Gagal memuat data SDM:', err);
+    loadingEl.textContent = 'Gagal memuat data SDM. Pastikan API_URL benar dan Apps Script sudah mendukung ?action=sdm_directory serta sheet PENSIUN_2026_2028. Detail error ada di console (F12).';
+  }
+}
+
+// Klasifikasi status kepegawaian dari teks bebas di kolom STATUS
+// (Data Pegawai) — dicocokkan berdasarkan kata kunci, bukan nilai pasti,
+// supaya tahan terhadap variasi penulisan (mis. "PNS", "Pppk", "Kontrak").
+function statusPegawaiKategori(statusVal){
+  const v = String(statusVal || '').trim().toLowerCase();
+  if(!v) return null;
+  if(v.includes('pppk')) return 'PPPK';
+  if(v.includes('pns')) return 'PNS';
+  if(v.includes('kontrak')) return 'Kontrak';
+  return null;
+}
+
+function renderSdmKPI(){
+  const total = sdmDirectory.length;
+  document.getElementById('sdmKpiTotal').textContent = total.toLocaleString('id-ID');
+
+  const statusCount = countBy(sdmDirectory, p => statusPegawaiKategori(p.statusKepegawaian));
+  const pns = statusCount['PNS'] || 0, pppk = statusCount['PPPK'] || 0, kontrak = statusCount['Kontrak'] || 0;
+  document.getElementById('sdmKpiStatusRatio').textContent = (pns || pppk || kontrak) ? `${pns} : ${pppk} : ${kontrak}` : '–';
+
+  const usiaValues = sdmDirectory.map(p => parseInt(p.usia,10)).filter(n => !isNaN(n));
+  const rataUsia = usiaValues.length ? Math.round(usiaValues.reduce((a,b)=>a+b,0)/usiaValues.length) : 0;
+  document.getElementById('sdmKpiUsia').textContent = usiaValues.length ? rataUsia : '–';
+
+  const pensiunDekat = sdmPensiunList.filter(p => p.tmtPensiunTahun === 2026 || p.tmtPensiunTahun === 2027).length;
+  document.getElementById('sdmKpiPensiun').textContent = pensiunDekat.toLocaleString('id-ID');
+
+  const laki = sdmDirectory.filter(p => String(p.jenisKelamin).toLowerCase().includes('laki')).length;
+  const perempuan = sdmDirectory.filter(p => String(p.jenisKelamin).toLowerCase().includes('perempuan')).length;
+  document.getElementById('sdmKpiGender').textContent = (laki || perempuan) ? `${laki} : ${perempuan}` : '–';
+}
+
+function countBy(list, fn){
+  const map = {};
+  list.forEach(item => {
+    const key = fn(item);
+    if(key === null || key === undefined || key === '') return;
+    map[key] = (map[key] || 0) + 1;
+  });
+  return map;
+}
+
+let chartSdmGenerasi = null, chartSdmGolongan = null, chartSdmUnitKerja = null, chartSdmJabatan = null;
+let sdmKomposisiFilterKey = 'GENERASI';
+function renderSdmKomposisiChart(){
+  const CYAN = cssVar('--cyan'), VIOLET = cssVar('--violet'), AMBER = cssVar('--amber'),
+        CORAL = cssVar('--coral'), MINT = cssVar('--mint'), TXTDIM = cssVar('--text-dim');
+  const palette = [CYAN, VIOLET, AMBER, CORAL, MINT];
+  const elGen = document.getElementById('chartSdmGenerasi');
+  if(!elGen) return;
+
+  let labels, data;
+  if(sdmKomposisiFilterKey === 'USIA'){
+    const usiaCount = countBy(sdmDirectory, p => usiaToBucket(p.usia));
+    const order = ['20–30','31–40','41–50','51–60','>60'].filter(k => usiaCount[k]);
+    labels = order;
+    data = order.map(k => usiaCount[k]);
+  } else {
+    const generasiCount = countBy(sdmDirectory, p => usiaToGenerasi(p.usia));
+    const order = ['Gen Z','Milenial','Gen X','Baby Boomer'].filter(k => generasiCount[k]);
+    labels = order;
+    data = order.map(k => generasiCount[k]);
+  }
+
+  if(chartSdmGenerasi){ chartSdmGenerasi.destroy(); chartInstances = chartInstances.filter(c=>c!==chartSdmGenerasi); }
+  chartSdmGenerasi = new Chart(elGen, { type:'doughnut',
+    data:{ labels, datasets:[{ data, backgroundColor: palette, borderWidth:0 }] },
+    options:{ plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10, padding:14, color:TXTDIM } } }, cutout:'62%' }
+  });
+  chartInstances.push(chartSdmGenerasi);
+}
+document.querySelectorAll('#sdmKomposisiFilterRow .filter-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('#sdmKomposisiFilterRow .filter-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    sdmKomposisiFilterKey = chip.dataset.key;
+    renderSdmKomposisiChart();
+  });
+});
+let sdmGolonganFilterKey = 'PNS';
+function renderSdmGolonganChart(){
+  const VIOLET = cssVar('--violet'), TXTDIM = cssVar('--text-dim'), GRID = cssVar('--grid');
+  const elGol = document.getElementById('chartSdmGolongan');
+  if(!elGol) return;
+
+  let labels, data;
+  if(sdmGolonganFilterKey === 'PPPK'){
+    const pppkCount = countBy(sdmDirectory.filter(p => golonganStatus(p.golongan) === 'PPPK'), p => pppkGrade(p.golongan));
+    const order = Object.keys(pppkCount).sort((a,b) => romanToInt(a) - romanToInt(b));
+    labels = order.map(g => 'Grade ' + g);
+    data = order.map(k => pppkCount[k]);
+  } else {
+    const pnsCount = countBy(sdmDirectory.filter(p => golonganStatus(p.golongan) === 'PNS'), p => golonganMajor(p.golongan));
+    const order = ['IV','III','II','I'].filter(k => pnsCount[k]);
+    labels = order.map(g => 'Gol. ' + g);
+    data = order.map(k => pnsCount[k]);
+  }
+
+  if(chartSdmGolongan){ chartSdmGolongan.destroy(); chartInstances = chartInstances.filter(c=>c!==chartSdmGolongan); }
+  chartSdmGolongan = new Chart(elGol, { type:'bar',
+    data:{ labels, datasets:[{ data, backgroundColor: VIOLET, borderRadius:8 }] },
+    options:{ plugins:{ legend:{ display:false } }, scales:{ y:{ grid:{ color:GRID }, ticks:{ color:TXTDIM } }, x:{ grid:{ display:false }, ticks:{ color:TXTDIM } } } }
+  });
+  chartInstances.push(chartSdmGolongan);
+}
+document.querySelectorAll('#sdmGolonganFilterRow .filter-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('#sdmGolonganFilterRow .filter-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    sdmGolonganFilterKey = chip.dataset.key;
+    renderSdmGolonganChart();
+  });
+});
+function renderSdmCharts(){
+  const CYAN = cssVar('--cyan'), VIOLET = cssVar('--violet'), AMBER = cssVar('--amber'),
+        CORAL = cssVar('--coral'), MINT = cssVar('--mint'), TXTDIM = cssVar('--text-dim'), GRID = cssVar('--grid');
+  const palette = [CYAN, VIOLET, AMBER, CORAL, MINT];
+
+  renderSdmKomposisiChart();
+  renderSdmGolonganChart();
+
+  const unitCount = countBy(sdmDirectory, p => p.unitKerja);
+  const unitOrder = Object.keys(unitCount).sort((a,b)=>unitCount[b]-unitCount[a]);
+  const elUnit = document.getElementById('chartSdmUnitKerja');
+  if(elUnit){
+    if(chartSdmUnitKerja){ chartSdmUnitKerja.destroy(); chartInstances = chartInstances.filter(c=>c!==chartSdmUnitKerja); }
+    chartSdmUnitKerja = new Chart(elUnit, { type:'bar',
+      data:{ labels: unitOrder, datasets:[{ data: unitOrder.map(k=>unitCount[k]), backgroundColor: CYAN, borderRadius:8 }] },
+      options:{ indexAxis:'y', plugins:{ legend:{ display:false } }, scales:{ x:{ grid:{ color:GRID }, ticks:{ color:TXTDIM } }, y:{ grid:{ display:false }, ticks:{ color:TXTDIM } } } }
+    });
+    chartInstances.push(chartSdmUnitKerja);
+  }
+
+  const jabatanCount = countBy(sdmDirectory, p => (p.jabatan||'').trim());
+  const jabatanTop = Object.keys(jabatanCount).sort((a,b)=>jabatanCount[b]-jabatanCount[a]).slice(0,8);
+  const elJab = document.getElementById('chartSdmJabatan');
+  if(elJab){
+    if(chartSdmJabatan){ chartSdmJabatan.destroy(); chartInstances = chartInstances.filter(c=>c!==chartSdmJabatan); }
+    chartSdmJabatan = new Chart(elJab, { type:'bar',
+      data:{ labels: jabatanTop.map(j => j.length>28 ? j.slice(0,28)+'…' : j), datasets:[{ data: jabatanTop.map(k=>jabatanCount[k]), backgroundColor: AMBER, borderRadius:8 }] },
+      options:{ indexAxis:'y', plugins:{ legend:{ display:false } }, scales:{ x:{ grid:{ color:GRID }, ticks:{ color:TXTDIM } }, y:{ grid:{ display:false }, ticks:{ color:TXTDIM } } } }
+    });
+    chartInstances.push(chartSdmJabatan);
+  }
+}
+
+function renderSdmPensiunTable(){
+  const tbody = document.getElementById('sdmPensiunBody');
+  const wrapEl = document.getElementById('sdmPensiunTableWrap');
+  const emptyEl = document.getElementById('sdmPensiunEmptyState');
+  if(sdmPensiunList.length === 0){
+    wrapEl.style.display = 'none';
+    emptyEl.style.display = 'block';
+    return;
+  }
+  wrapEl.style.display = 'block';
+  emptyEl.style.display = 'none';
+  tbody.innerHTML = sdmPensiunList.map((p, idx) => {
+    const badge = pensiunBadge(p.tmtPensiunTahun);
+    return `<tr class="umum-row sdm-pensiun-row" data-idx="${idx}">
+      <td>${p.nama || '-'}</td>
+      <td class="mono">${formatTanggalPensiun(p.tmtPensiunRaw)}</td>
+      <td class="mono">${p.golongan || '-'}</td>
+      <td>${p.unitKerja || '-'}</td>
+      <td class="mono">${p.masaKerja || '-'}</td>
+      <td><span class="pill ${badge.cls}">${badge.label}</span></td>
+    </tr>`;
+  }).join('');
+}
+document.getElementById('sdmPensiunBody').addEventListener('click', (e) => {
+  const tr = e.target.closest('tr.sdm-pensiun-row');
+  if(!tr) return;
+  const idx = parseInt(tr.dataset.idx, 10);
+  const p = sdmPensiunList[idx];
+  if(!p) return;
+  const badge = pensiunBadge(p.tmtPensiunTahun);
+  openDetailModal('Detail Proyeksi Pensiun', [
+    ['Nama', p.nama],
+    ['Jabatan', p.jabatan],
+    ['Golongan', p.golongan],
+    ['Unit Kerja', p.unitKerja],
+    ['Masa Kerja', p.masaKerja],
+    ['Perkiraan Pensiun', badge.label],
+  ]);
+});
+
+// ===== Cek Sisa Cuti Pegawai — hanya menampilkan nama & rincian cuti kalau
+// dicari, tidak pernah menampilkan daftar seluruh pegawai. =====
+const SDM_CUTI_MAX_RESULTS = 12;
+function renderSdmCutiSearch(query){
+  const resultEl = document.getElementById('sdmCutiResult');
+  if(!resultEl) return;
+  const q = String(query || '').trim().toLowerCase();
+  if(!q){
+    resultEl.innerHTML = '<div style="padding:14px 4px; color:var(--text-faint); font-size:12.5px;">Ketik nama pegawai untuk melihat rincian sisa cutinya.</div>';
+    return;
+  }
+  const matches = sdmDirectory.filter(p => String(p.nama || '').toLowerCase().includes(q));
+  if(matches.length === 0){
+    resultEl.innerHTML = '<div style="padding:14px 4px; color:var(--text-faint); font-size:12.5px;">Tidak ada pegawai dengan nama tersebut — coba periksa ejaannya.</div>';
+    return;
+  }
+  const shown = matches.slice(0, SDM_CUTI_MAX_RESULTS);
+  resultEl.innerHTML = shown.map(p => `
+    <div class="platform-row">
+      <div class="p-info">
+        <div class="p-name">${p.nama || '-'}</div>
+        <div class="p-meta">${p.jabatan || '-'}${p.unitKerja ? ' · ' + p.unitKerja : ''}</div>
+      </div>
+      <div style="display:flex; gap:22px; text-align:right; flex-shrink:0;">
+        <div><div class="tm-label">Sisa 2025</div><div class="tm-val" style="font-size:15px;">${p.sisaCuti2025 !== '' && p.sisaCuti2025 !== undefined ? p.sisaCuti2025 : '-'}</div></div>
+        <div><div class="tm-label">Jatah 2026</div><div class="tm-val" style="font-size:15px;">${p.sisaCuti2026 !== '' && p.sisaCuti2026 !== undefined ? p.sisaCuti2026 : '-'}</div></div>
+        <div><div class="tm-label">Total Cuti</div><div class="tm-val" style="font-size:15px;">${p.totalCuti !== '' && p.totalCuti !== undefined ? p.totalCuti : '-'}</div></div>
+      </div>
+    </div>`).join('')
+    + (matches.length > SDM_CUTI_MAX_RESULTS
+        ? `<div style="text-align:center; color:var(--text-faint); font-size:11px; padding-top:10px;">Menampilkan ${SDM_CUTI_MAX_RESULTS} dari ${matches.length} hasil — perjelas nama pencarian.</div>`
+        : '');
+}
+const sdmCutiInput = document.getElementById('sdmCutiSearchInput');
+if(sdmCutiInput){
+  sdmCutiInput.addEventListener('input', (e) => renderSdmCutiSearch(e.target.value));
+  renderSdmCutiSearch(''); // tampilkan pesan awal
+}
+
+// Menyalurkan data asli SDM ke KPI & grafik Komposisi SDM di Beranda,
+// menggantikan angka dummy begitu data tersedia.
+function updateBerandaFromSdm(){
+  const kpiPegawai = document.getElementById('berandaKpiPegawai');
+  const kpiPensiun = document.getElementById('berandaKpiPensiun');
+  if(kpiPegawai) kpiPegawai.textContent = sdmDirectory.length.toLocaleString('id-ID');
+  if(kpiPensiun){
+    const pensiunDekat = sdmPensiunList.filter(p => p.tmtPensiunTahun === 2026 || p.tmtPensiunTahun === 2027).length;
+    kpiPensiun.textContent = pensiunDekat.toLocaleString('id-ID');
+  }
+
+  const generasiCount = countBy(sdmDirectory, p => usiaToGenerasi(p.usia));
+  const generasiOrder = ['Gen Z','Milenial','Gen X','Baby Boomer'].filter(k => generasiCount[k]);
+  const usiaCount = countBy(sdmDirectory, p => usiaToBucket(p.usia));
+  const usiaOrder = ['20–30','31–40','41–50','51–60','>60'].filter(k => usiaCount[k]);
+  const jabatanCount = countBy(sdmDirectory, p => (p.jabatan||'').trim());
+  const jabatanTop = Object.keys(jabatanCount).sort((a,b)=>jabatanCount[b]-jabatanCount[a]).slice(0,6);
+  const unitCount = countBy(sdmDirectory, p => p.unitKerja);
+  const unitOrder = Object.keys(unitCount).sort((a,b)=>unitCount[b]-unitCount[a]);
+
+  if(generasiOrder.length){
+    sdmComposition.GENERASI = { type:'doughnut', labels: generasiOrder, data: generasiOrder.map(k=>generasiCount[k]) };
+  }
+  if(usiaOrder.length){
+    sdmComposition.USIA = { type:'doughnut', labels: usiaOrder, data: usiaOrder.map(k=>usiaCount[k]) };
+  }
+  if(jabatanTop.length){
+    sdmComposition.JABATAN = { type:'bar', labels: jabatanTop.map(j => j.length>18 ? j.slice(0,18)+'…' : j), data: jabatanTop.map(k=>jabatanCount[k]) };
+  }
+  if(unitOrder.length){
+    sdmComposition.UNIT_KERJA = { type:'bar', labels: unitOrder, data: unitOrder.map(k=>unitCount[k]) };
+  }
+  // render ulang chart Beranda yang sedang aktif dengan data asli di atas
+  const old = chartInstances.find(c=>c.canvas && c.canvas.id==='chartSDMBeranda');
+  if(old){ old.destroy(); chartInstances = chartInstances.filter(c=>c!==old); }
+  renderSDMChart(sdmActiveKey);
+}
+
+/* ======================================================================
+   TAB KEUANGAN — Dokumen SPM & SPBY
+   keuanganData: { spm:{monthly:[{bulan,dibayarkan,diarsipkan,belumDiarsipkan,persentaseArsip}], total:{...}},
+                   spby:{...sama...} }
+   Baris TOTAL dipisah dari data bulanan di sisi server — grafik HANYA memakai
+   monthly, dan tidak pernah menambah bulan yang belum ada datanya.
+   ====================================================================== */
+let keuanganData = null;
+let keuanganLoaded = false;
+let keuanganLoadStarted = false;
+
+const BULAN_PENDEK = {
+  'januari':'Jan','februari':'Feb','maret':'Mar','april':'Apr','mei':'Mei','juni':'Jun',
+  'juli':'Jul','agustus':'Agu','september':'Sep','oktober':'Okt','november':'Nov','desember':'Des',
+};
+function shortBulan(b){
+  const key = String(b).trim().toLowerCase();
+  return BULAN_PENDEK[key] || b;
+}
+function fmtPersen(n){
+  return n.toLocaleString('id-ID', { minimumFractionDigits:2, maximumFractionDigits:2 }) + '%';
+}
+
+async function loadKeuanganData(){
+  if(keuanganLoadStarted) return;
+  keuanganLoadStarted = true;
+  const loadingEl = document.getElementById('keuanganLoadingState');
+  const contentEl = document.getElementById('keuanganContent');
+  loadingEl.style.display = 'block';
+  loadingEl.textContent = 'Memuat data keuangan dari spreadsheet...';
+  contentEl.style.display = 'none';
+  try{
+    keuanganData = await fetchKeuanganData();
+    keuanganLoaded = true;
+    loadingEl.style.display = 'none';
+    contentEl.style.display = 'block';
+    renderKeuanganKPI();
+    renderKeuanganCharts();
+  }catch(err){
+    console.error('[KEUANGAN] Gagal memuat data:', err);
+    loadingEl.textContent = 'Gagal memuat data KEUANGAN. Pastikan Apps Script sudah mendukung ?action=keuangan_data dan nama sheet persis: KEUANGAN. Detail error ada di console (F12).';
+    keuanganLoadStarted = false;
+  }
+}
+
+function renderKeuanganKPI(){
+  const spmTotal = keuanganData.spm && keuanganData.spm.total;
+  const spbyTotal = keuanganData.spby && keuanganData.spby.total;
+
+  const spmDibayar = Number(spmTotal && spmTotal.dibayarkan) || 0;
+  const spmDiarsip = Number(spmTotal && spmTotal.diarsipkan) || 0;
+  const spmBelum = Number(spmTotal && spmTotal.belumDiarsipkan) || 0;
+
+  const spbyDibayar = Number(spbyTotal && spbyTotal.dibayarkan) || 0;
+  const spbyDiarsip = Number(spbyTotal && spbyTotal.diarsipkan) || 0;
+  const spbyBelum = Number(spbyTotal && spbyTotal.belumDiarsipkan) || 0;
+
+  document.getElementById('keuKpiTotalSpm').textContent = spmTotal ? spmDibayar.toLocaleString('id-ID') : '–';
+  document.getElementById('keuKpiTotalSpby').textContent = spbyTotal ? spbyDibayar.toLocaleString('id-ID') : '–';
+
+  const spmPct = spmDibayar > 0 ? (spmDiarsip / spmDibayar * 100) : 0;
+  const spbyPct = spbyDibayar > 0 ? (spbyDiarsip / spbyDibayar * 100) : 0;
+  document.getElementById('keuKpiArsipSpmPct').textContent = spmTotal ? fmtPersen(spmPct) : '–';
+  document.getElementById('keuKpiArsipSpmFrac').textContent = spmTotal ? `${spmDiarsip.toLocaleString('id-ID')} / ${spmDibayar.toLocaleString('id-ID')}` : '';
+  document.getElementById('keuKpiArsipSpbyPct').textContent = spbyTotal ? fmtPersen(spbyPct) : '–';
+  document.getElementById('keuKpiArsipSpbyFrac').textContent = spbyTotal ? `${spbyDiarsip.toLocaleString('id-ID')} / ${spbyDibayar.toLocaleString('id-ID')}` : '';
+
+  const totalBelum = spmBelum + spbyBelum;
+  document.getElementById('keuKpiBelumArsip').textContent = (spmTotal || spbyTotal) ? totalBelum.toLocaleString('id-ID') : '–';
+  document.getElementById('keuKpiBelumArsipDetail').textContent = (spmTotal || spbyTotal) ? `${spmBelum.toLocaleString('id-ID')} SPM · ${spbyBelum.toLocaleString('id-ID')} SPBY` : '';
+}
+
+let chartKeuanganSpm = null, chartKeuanganSpby = null;
+function buildKeuanganChart(canvasId, monthly, existingChart, CYAN, VIOLET, TXTDIM, GRID){
+  const el = document.getElementById(canvasId);
+  if(!el) return null;
+  if(existingChart){ existingChart.destroy(); chartInstances = chartInstances.filter(c=>c!==existingChart); }
+  const labels = monthly.map(m => shortBulan(m.bulan));
+  const dibayarkan = monthly.map(m => Number(m.dibayarkan) || 0);
+  const diarsipkan = monthly.map(m => Number(m.diarsipkan) || 0);
+  const chart = new Chart(el, { type:'bar',
+    data:{ labels, datasets:[
+      { label:'Dibayarkan', data:dibayarkan, backgroundColor:CYAN, borderRadius:6 },
+      { label:'Diarsipkan', data:diarsipkan, backgroundColor:VIOLET, borderRadius:6 },
+    ]},
+    options:{ plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10, padding:14, color:TXTDIM } } },
+      scales:{ y:{ grid:{ color:GRID }, ticks:{ color:TXTDIM } }, x:{ grid:{ display:false }, ticks:{ color:TXTDIM } } } }
+  });
+  chartInstances.push(chart);
+  return chart;
+}
+function renderKeuanganCharts(){
+  const CYAN = cssVar('--cyan'), VIOLET = cssVar('--violet'), TXTDIM = cssVar('--text-dim'), GRID = cssVar('--grid');
+  chartKeuanganSpm = buildKeuanganChart('chartKeuanganSpm', keuanganData.spm.monthly, chartKeuanganSpm, CYAN, VIOLET, TXTDIM, GRID);
+  chartKeuanganSpby = buildKeuanganChart('chartKeuanganSpby', keuanganData.spby.monthly, chartKeuanganSpby, CYAN, VIOLET, TXTDIM, GRID);
+}
+
+/* ======================================================================
+   TAB BMN — Inventaris & Aset
+   Sumber: ?action=bmn_data -> { aset:{items}, penghapusan:{items,total},
+   psp, pemanfaatan, jadwal }. 4 sheet sumber (BMN_Aset, BMN_Database
+   Penghapusan, BMN_PSP & Pemanfaatan, BMN_Jadwal) TIDAK digabung jadi satu
+   -- masing-masing tetap punya fungsi/visual sendiri (lihat brief update).
+   Sheet BMN_Dashboard & Summary sengaja tidak dipakai; semua KPI dihitung
+   dari data mentah supaya tidak ada dua sumber angka yang beda.
+   Jadwal & Pengingat (BMN_Jadwal) sekarang ditampilkan di Beranda ->
+   Perhatian Manajemen, bukan panel terpisah di Tab BMN lagi.
+   ====================================================================== */
+let bmnData = null;
+let bmnLoaded = false;
+let bmnLoadStarted = false;
+
+function hariSelisih(tanggalISO){
+  if(!tanggalISO) return null;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const target = new Date(tanggalISO + 'T00:00:00');
+  if(isNaN(target.getTime())) return null;
+  return Math.round((target - today) / 86400000);
+}
+function badgeJadwal(days){
+  if(days === null) return { cls:'past', label:'Tanggal belum jelas' };
+  if(days < 0) return { cls:'past', label:`Lewat H+${Math.abs(days)}` };
+  if(days === 0) return { cls:'urgent', label:'Hari ini' };
+  if(days <= 7) return { cls:'urgent', label:`H-${days}` };
+  if(days <= 30) return { cls:'soon', label:`H-${days}` };
+  return { cls:'later', label:`H-${days}` };
+}
+function pillKondisi(k){
+  const key = String(k).trim().toLowerCase();
+  if(key.indexOf('rusak berat') === 0) return 'red';
+  if(key.indexOf('rusak ringan') === 0) return 'amber';
+  if(key.indexOf('baik') === 0) return 'green';
+  return 'violet';
+}
+function pillStatusUmum(s){
+  const key = String(s).trim().toLowerCase();
+  if(key.indexOf('belum') > -1) return 'amber';
+  if(key.indexOf('sudah') > -1 || key.indexOf('terbit') > -1 || key.indexOf('lengkap') > -1) return 'green';
+  return 'blue';
+}
+
+async function loadBmnData(){
+  if(bmnLoadStarted) return;
+  bmnLoadStarted = true;
+  const loadingEl = document.getElementById('bmnLoadingState');
+  const contentEl = document.getElementById('bmnContent');
+  loadingEl.style.display = 'block';
+  loadingEl.textContent = 'Memuat data BMN dari spreadsheet...';
+  contentEl.style.display = 'none';
+  try{
+    bmnData = await fetchBmnData();
+    bmnLoaded = true;
+    loadingEl.style.display = 'none';
+    contentEl.style.display = 'block';
+    renderBmnKPI();
+    renderBmnCharts();
+    renderBmnPenghapusanTable();
+    renderBmnPemanfaatanTable();
+    renderBmnAsetTable();
+    updateBerandaFromBmn();
+    renderBmnAttentionFromJadwal();
+  }catch(err){
+    console.error('[BMN] Gagal memuat data:', err);
+    loadingEl.textContent = 'Gagal memuat data BMN. Pastikan Apps Script sudah mendukung ?action=bmn_data dan nama sheet persis: BMN_Aset, BMN_Database Penghapusan, BMN_PSP & Pemanfaatan, BMN_Jadwal. Detail error ada di console (F12).';
+    bmnLoadStarted = false;
+  }
+}
+
+// KPI + card "Kondisi Aset" (Baik / Rusak Ringan / Rusak Berat) dihitung dari
+// BMN_Aset. KPI Penghapusan tetap dari BMN_Database Penghapusan, KPI
+// Pemanfaatan/PSP tetap dari BMN_PSP & Pemanfaatan -- ketiga sumber ini
+// TIDAK dicampur satu sama lain.
+function renderBmnKPI(){
+  const asetItems = (bmnData.aset && bmnData.aset.items) || [];
+  document.getElementById('bmnKpiTotalAset').textContent = asetItems.length.toLocaleString('id-ID');
+
+  const kondisiCount = { 'Baik':0, 'Rusak Ringan':0, 'Rusak Berat':0 };
+  asetItems.forEach(a => {
+    if(Object.prototype.hasOwnProperty.call(kondisiCount, a.kondisiNormalisasi)) kondisiCount[a.kondisiNormalisasi]++;
+  });
+  document.getElementById('bmnKpiKondisiBaik').textContent = kondisiCount['Baik'].toLocaleString('id-ID');
+  document.getElementById('bmnKpiKondisiRr').textContent = kondisiCount['Rusak Ringan'].toLocaleString('id-ID');
+  document.getElementById('bmnKpiKondisiRb').textContent = kondisiCount['Rusak Berat'].toLocaleString('id-ID');
+
+  const penghapusan = bmnData.penghapusan || { items: [], total: null };
+  const items = penghapusan.items || [];
+  const totalUnit = penghapusan.total ? Number(penghapusan.total.jumlah) || 0
+    : items.reduce((s,d) => s + (Number(d.jumlah) || 0), 0);
+  document.getElementById('bmnKpiTotalPenghapusan').textContent = totalUnit.toLocaleString('id-ID');
+  document.getElementById('bmnKpiTotalPenghapusanSub').textContent = `${items.length} objek/paket`;
+
+  const psp = bmnData.psp;
+  document.getElementById('bmnKpiPemanfaatan').textContent = (bmnData.pemanfaatan || []).length.toLocaleString('id-ID');
+  document.getElementById('bmnKpiBelumPspSub').textContent = psp
+    ? `Belum PSP: ${Number(psp.belumPsp || 0).toLocaleString('id-ID')} dari ${Number(psp.totalPopulasiAset || 0).toLocaleString('id-ID')} aset`
+    : 'Belum PSP: –';
+}
+
+let chartBmnKondisiAset = null, chartBmnPsp = null;
+function renderBmnCharts(){
+  const AMBER = cssVar('--amber'), CORAL = cssVar('--coral'), MINT = cssVar('--mint'),
+        TXTDIM = cssVar('--text-dim'), GRID = cssVar('--grid');
+
+  // Distribusi Kondisi Aset (BMN_Aset) -- bar horizontal, 3 kategori tetap
+  // (Baik / Rusak Ringan / Rusak Berat) supaya mudah dibaca dan konsisten
+  // dengan card KPI "Kondisi Aset" di atasnya.
+  const asetItems = (bmnData.aset && bmnData.aset.items) || [];
+  const kondisiCount = { 'Baik':0, 'Rusak Ringan':0, 'Rusak Berat':0 };
+  asetItems.forEach(a => {
+    if(Object.prototype.hasOwnProperty.call(kondisiCount, a.kondisiNormalisasi)) kondisiCount[a.kondisiNormalisasi]++;
+  });
+
+  if(chartBmnKondisiAset){ chartBmnKondisiAset.destroy(); chartInstances = chartInstances.filter(c=>c!==chartBmnKondisiAset); }
+  const elKA = document.getElementById('chartBmnKondisiAset');
+  if(elKA){
+    chartBmnKondisiAset = new Chart(elKA, { type:'bar',
+      data:{ labels:['Baik','Rusak Ringan','Rusak Berat'],
+        datasets:[{ data:[kondisiCount['Baik'], kondisiCount['Rusak Ringan'], kondisiCount['Rusak Berat']],
+          backgroundColor:[MINT, AMBER, CORAL], borderRadius:6, barThickness:26 }] },
+      options:{ indexAxis:'y', plugins:{ legend:{ display:false } },
+        scales:{
+          x:{ beginAtZero:true, grid:{ color:GRID }, ticks:{ color:TXTDIM, precision:0 } },
+          y:{ grid:{ display:false }, ticks:{ color:TXTDIM } }
+        } }
+    });
+    chartInstances.push(chartBmnKondisiAset);
+  }
+
+  if(chartBmnPsp){ chartBmnPsp.destroy(); chartInstances = chartInstances.filter(c=>c!==chartBmnPsp); }
+  const elP = document.getElementById('chartBmnPsp');
+  if(elP){
+    const psp = bmnData.psp;
+    const sudah = psp ? Number(psp.sudahPsp) || 0 : 0;
+    const belum = psp ? Number(psp.belumPsp) || 0 : 0;
+    chartBmnPsp = new Chart(elP, { type:'doughnut',
+      data:{ labels:['Sudah PSP','Belum PSP'], datasets:[{ data:[sudah,belum], backgroundColor:[MINT,CORAL], borderWidth:0 }] },
+      options:{ plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10, padding:14, color:TXTDIM } } }, cutout:'62%' }
+    });
+    chartInstances.push(chartBmnPsp);
+  }
+
+  const pspSubEl = document.getElementById('bmnPspSub');
+  if(pspSubEl && bmnData.psp) pspSubEl.textContent = bmnData.psp.statusTindakLanjut || 'Sudah PSP vs Belum PSP';
+}
+
+function renderBmnPenghapusanTable(){
+  const items = (bmnData.penghapusan && bmnData.penghapusan.items) || [];
+  const body = document.getElementById('bmnPenghapusanBody');
+  body.innerHTML = items.map((d,i) => `
+    <tr style="cursor:pointer;" onclick="openBmnPenghapusanDetail(${i})">
+      <td>${d.jenis || ''}</td>
+      <td><span class="pill ${pillKondisi(d.kondisi)}">${d.kondisi || '–'}</span></td>
+      <td class="mono">${d.nilaiPerolehan || '–'}</td>
+      <td class="mono">${d.jumlah || '–'}</td>
+      <td><span class="pill ${pillStatusUmum(d.statusSkPenghapusan)}">${d.statusSkPenghapusan || '–'}</span></td>
+      <td>${d.tindakLanjut || '–'}</td>
+    </tr>`).join('');
+}
+function openBmnPenghapusanDetail(i){
+  const d = (bmnData.penghapusan.items || [])[i];
+  if(!d) return;
+  openDetailModal('Detail Usulan Penghapusan BMN', [
+    ['Jenis / Objek', d.jenis],
+    ['Kondisi', d.kondisi],
+    ['Nilai Perolehan', d.nilaiPerolehan],
+    ['Jumlah (Unit)', d.jumlah],
+    ['ND Usulan Dirut', d.ndUsulanDirut],
+    ['Persetujuan Penjualan', d.persetujuanPenjualan],
+    ['Surat Penetapan Lelang', d.suratPenetapanLelang],
+    ['KPKNL', d.kpknl],
+    ['Risalah Lelang', d.risalahLelang],
+    ['Status SK Penghapusan', d.statusSkPenghapusan],
+    ['Tindak Lanjut / Kendala', d.tindakLanjut],
+  ]);
+}
+
+function renderBmnPemanfaatanTable(){
+  const list = bmnData.pemanfaatan || [];
+  const wrap = document.getElementById('bmnPemanfaatanWrap');
+  const empty = document.getElementById('bmnPemanfaatanEmptyState');
+  if(list.length === 0){
+    wrap.style.display = 'none';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  wrap.style.display = 'block';
+  document.getElementById('bmnPemanfaatanBody').innerHTML = list.map(d => `
+    <tr>
+      <td>${d.bentukPemanfaatan || ''}</td>
+      <td>${d.objekBmn || '–'}</td>
+      <td>${d.mitraPengelola || '–'}</td>
+      <td><span class="pill ${pillStatusUmum(d.statusDokumen)}">${d.statusDokumen || '–'}</span></td>
+      <td>${d.tindakLanjut || '–'}</td>
+    </tr>`).join('');
+}
+
+/* ---- Database Aset BMN (BMN_Aset) — tabel ringkas + pencarian + popup ---- */
+let bmnAsetSearchQuery = '';
+const BMN_ASET_MAX_ROWS = 200; // batasi baris yang dirender sekaligus agar tabel tetap ringan
+
+function getFilteredBmnAset(){
+  const items = (bmnData.aset && bmnData.aset.items) || [];
+  const q = bmnAsetSearchQuery.trim().toLowerCase();
+  if(!q) return items;
+  // Pencarian hanya di-scope ke 4 kolom ini sesuai brief -- bukan seluruh 26 kolom.
+  return items.filter(a =>
+    String(a.kodeBarang || '').toLowerCase().includes(q) ||
+    String(a.nup || '').toLowerCase().includes(q) ||
+    String(a.namaBarang || '').toLowerCase().includes(q) ||
+    String(a.kodeRegister || '').toLowerCase().includes(q)
+  );
+}
+
+function renderBmnAsetTable(){
+  const data = getFilteredBmnAset();
+  const tbody = document.getElementById('bmnAsetBody');
+  const wrapEl = document.getElementById('bmnAsetTableWrap');
+  const emptyEl = document.getElementById('bmnAsetEmptyState');
+
+  if(data.length === 0){
+    tbody.innerHTML = '';
+    wrapEl.style.display = 'none';
+    emptyEl.style.display = 'block';
+    return;
+  }
+  wrapEl.style.display = 'block';
+  emptyEl.style.display = 'none';
+
+  const allItems = (bmnData.aset && bmnData.aset.items) || [];
+  const shown = data.slice(0, BMN_ASET_MAX_ROWS);
+  let rowsHtml = shown.map(a => {
+    const idx = allItems.indexOf(a);
+    return `<tr style="cursor:pointer;" data-idx="${idx}">
+      <td class="mono">${a.kodeBarang || '–'}</td>
+      <td class="mono">${a.nup || '–'}</td>
+      <td>${a.namaBarang || '–'}</td>
+      <td class="mono">${a.kodeRegister || '–'}</td>
+      <td><span class="pill ${pillKondisi(a.kondisi)}">${a.kondisi || '–'}</span></td>
+    </tr>`;
+  }).join('');
+  if(data.length > BMN_ASET_MAX_ROWS){
+    rowsHtml += `<tr><td colspan="5" style="text-align:center; color:var(--text-faint); font-size:11.5px; padding-top:14px;">Menampilkan ${BMN_ASET_MAX_ROWS} dari ${data.length} hasil — persempit pencarian untuk hasil lebih spesifik.</td></tr>`;
+  }
+  tbody.innerHTML = rowsHtml;
+}
+
+function openBmnAsetDetail(i){
+  const items = (bmnData.aset && bmnData.aset.items) || [];
+  const d = items[i];
+  if(!d) return;
+  // Field kosong otomatis disembunyikan oleh openDetailModal (lihat definisinya).
+  openDetailModal('Detail Aset BMN', [
+    ['Kode Barang', d.kodeBarang],
+    ['NUP', d.nup],
+    ['Nama Barang', d.namaBarang],
+    ['Kode Register', d.kodeRegister],
+    ['Kode Satker', d.kodeSatker],
+    ['Nama Satker', d.namaSatker],
+    ['Merk', d.merk],
+    ['Tipe', d.tipe],
+    ['Kondisi', d.kondisi],
+    ['Keterangan', d.keterangan],
+    ['Nilai Permohonan', d.nilaiPermohonan],
+    ['Informasi Tanah', d.informasiTanah],
+    ['Peruntukkan', d.peruntukkan],
+    ['Cara Penjualan', d.caraPenjualan],
+    ['Pilihan Penjualan', d.pilihanPenjualan],
+    ['Nama Pembeli', d.namaPembeli],
+    ['Jabatan Pembeli', d.jabatanPembeli],
+  ]);
+}
+
+document.getElementById('bmnAsetSearchInput').addEventListener('input', (e) => {
+  bmnAsetSearchQuery = e.target.value;
+  renderBmnAsetTable();
+});
+document.getElementById('bmnAsetBody').addEventListener('click', (e) => {
+  const tr = e.target.closest('tr[data-idx]');
+  if(!tr) return;
+  openBmnAsetDetail(parseInt(tr.dataset.idx, 10));
+});
+
+// Menyalurkan Total Aset BMN (data asli dari BMN_Aset) ke KPI uji coba di Beranda.
+function updateBerandaFromBmn(){
+  const el = document.getElementById('berandaKpiTotalAset');
+  if(el) el.textContent = ((bmnData.aset && bmnData.aset.items) || []).length.toLocaleString('id-ID');
+}
+
+// Jadwal & Pengingat (BMN_Jadwal) sekarang menjadi bagian dari Perhatian
+// Manajemen di Beranda, bukan panel terpisah di Tab BMN lagi. Hanya jadwal
+// yang jatuh <=30 hari (termasuk yang sudah lewat) yang ditampilkan, maksimal
+// 3 item, diurutkan dari yang paling mendesak -- supaya daftar tetap ringkas.
+function renderBmnAttentionFromJadwal(){
+  const list = (bmnData.jadwal || [])
+    .map(j => ({ j, days: hariSelisih(j.tanggal) }))
+    .filter(x => x.days !== null && x.days <= 30)
+    .sort((a,b) => a.days - b.days)
+    .slice(0, 3);
+
+  bmnAttentionItems = list.map(x => ({
+    level: badgeJadwal(x.days).cls === 'soon' ? 'amber' : 'red',
+    text: `[BMN] ${x.j.event} (${badgeJadwal(x.days).label})`,
+    goto: 'bmn',
+  }));
+  renderAttentionList();
+}
+
+/* ======================================================================
+   TAB KMB — Pertumbuhan & Distribusi Audiens Digital
+   Sumber: ?action=kmb_data -> { monthly:[{bulan,youtube,instagram,facebook,
+   tiktok,x,totalFollowers}], latest, previous }. Bulan yang belum ada
+   datanya TIDAK dikirim server -- jadi tidak pernah tampil sebagai 0.
+   Data ini juga menjadi sumber tunggal KPI "Total Followers" di Beranda,
+   supaya tidak ada dua angka yang bisa berbeda.
+   ====================================================================== */
+let kmbData = null;
+let kmbLoaded = false;
+let kmbLoadStarted = false;
+
+const KMB_PLATFORMS = [
+  { key:'youtube', label:'YouTube' },
+  { key:'instagram', label:'Instagram' },
+  { key:'facebook', label:'Facebook' },
+  { key:'tiktok', label:'TikTok' },
+  { key:'x', label:'X' },
+];
+
+function fmtPersenSigned(n){
+  const sign = n >= 0 ? '+' : '';
+  return sign + n.toLocaleString('id-ID', { minimumFractionDigits:2, maximumFractionDigits:2 }) + '%';
+}
+
+async function loadKmbData(){
+  if(kmbLoadStarted) return;
+  kmbLoadStarted = true;
+  const loadingEl = document.getElementById('kmbLoadingState');
+  const contentEl = document.getElementById('kmbContent');
+  if(loadingEl){ loadingEl.style.display = 'block'; loadingEl.textContent = 'Memuat data KMB dari spreadsheet...'; }
+  if(contentEl) contentEl.style.display = 'none';
+  try{
+    kmbData = await fetchKmbData();
+    kmbLoaded = true;
+    if(loadingEl) loadingEl.style.display = 'none';
+    if(contentEl) contentEl.style.display = 'block';
+
+    renderKmbBerandaKPI();
+    // Beranda "Perkembangan Followers" chart dibangun sebelum kmbData siap --
+    // gambar ulang sekarang dengan data asli, sama seperti saat ganti filter chip.
+    const oldFollowers = chartInstances.find(c=>c.canvas && c.canvas.id==='chartFollowersBeranda');
+    if(oldFollowers){ oldFollowers.destroy(); chartInstances = chartInstances.filter(c=>c!==oldFollowers); }
+    renderFollowersChart(followersActiveKey);
+
+    renderKmbKPI();
+    renderKmbCharts();
+    renderKmbTable();
+  }catch(err){
+    console.error('[KMB] Gagal memuat data:', err);
+    if(loadingEl) loadingEl.textContent = 'Gagal memuat data KMB. Pastikan Apps Script sudah mendukung ?action=kmb_data dan nama sheet persis: KMB_SOSMED. Detail error ada di console (F12).';
+    kmbLoadStarted = false;
+  }
+}
+
+function renderKmbBerandaKPI(){
+  const valEl = document.getElementById('berandaKpiFollowers');
+  const deltaEl = document.getElementById('berandaKpiFollowersDelta');
+  if(!valEl || !deltaEl || !kmbData || !kmbData.latest) return;
+  const latest = kmbData.latest, previous = kmbData.previous;
+  valEl.textContent = Number(latest.totalFollowers).toLocaleString('id-ID');
+  if(previous && Number(previous.totalFollowers) > 0){
+    const pct = (Number(latest.totalFollowers) - Number(previous.totalFollowers)) / Number(previous.totalFollowers) * 100;
+    deltaEl.textContent = `${pct >= 0 ? '▲' : '▼'} ${fmtPersenSigned(pct)} bulan ini`;
+    deltaEl.className = 'delta ' + (pct >= 0 ? 'up' : 'down');
+  }else{
+    deltaEl.textContent = 'Belum ada data pembanding';
+    deltaEl.className = 'delta flat';
+  }
+}
+
+function renderKmbKPI(){
+  const latest = kmbData && kmbData.latest;
+  const previous = kmbData && kmbData.previous;
+  if(!latest) return;
+
+  document.getElementById('kmbKpiTotal').textContent = Number(latest.totalFollowers).toLocaleString('id-ID');
+
+  const growthEl = document.getElementById('kmbKpiGrowth');
+  const growthSubEl = document.getElementById('kmbKpiGrowthSub');
+  if(previous && Number(previous.totalFollowers) > 0){
+    const totalPct = (Number(latest.totalFollowers) - Number(previous.totalFollowers)) / Number(previous.totalFollowers) * 100;
+    growthEl.textContent = fmtPersenSigned(totalPct);
+    growthSubEl.textContent = `vs Bulan Lalu (${previous.bulan})`;
+  }else{
+    growthEl.textContent = '—';
+    growthSubEl.textContent = 'Belum ada data pembanding';
+  }
+
+  let biggest = KMB_PLATFORMS[0];
+  KMB_PLATFORMS.forEach(p => { if((Number(latest[p.key])||0) > (Number(latest[biggest.key])||0)) biggest = p; });
+  document.getElementById('kmbKpiBiggest').textContent = biggest.label;
+  document.getElementById('kmbKpiBiggestSub').textContent = Number(latest[biggest.key] || 0).toLocaleString('id-ID');
+
+  const additionEl = document.getElementById('kmbKpiAddition');
+  const additionSubEl = document.getElementById('kmbKpiAdditionSub');
+  const fastestEl = document.getElementById('kmbKpiFastest');
+  const fastestSubEl = document.getElementById('kmbKpiFastestSub');
+
+  if(previous){
+    let addBiggest = null, addBiggestVal = -Infinity;
+    let fastest = null, fastestVal = -Infinity;
+    KMB_PLATFORMS.forEach(p => {
+      const prevVal = Number(previous[p.key]) || 0;
+      const nowVal = Number(latest[p.key]) || 0;
+      const diff = nowVal - prevVal;
+      if(diff > addBiggestVal){ addBiggestVal = diff; addBiggest = p; }
+      if(prevVal > 0){
+        const pct = diff / prevVal * 100;
+        if(pct > fastestVal){ fastestVal = pct; fastest = p; }
+      }
+    });
+    if(addBiggest){
+      additionEl.textContent = addBiggest.label;
+      additionSubEl.textContent = (addBiggestVal >= 0 ? '+' : '') + Math.round(addBiggestVal).toLocaleString('id-ID');
+    }
+    if(fastest){
+      fastestEl.textContent = fastest.label;
+      fastestSubEl.textContent = fmtPersenSigned(fastestVal);
+    }else{
+      fastestEl.textContent = '—';
+      fastestSubEl.textContent = 'Belum ada data pembanding';
+    }
+  }else{
+    additionEl.textContent = '—';
+    additionSubEl.textContent = 'Belum ada data pembanding';
+    fastestEl.textContent = '—';
+    fastestSubEl.textContent = 'Belum ada data pembanding';
+  }
+}
+
+let chartKmbGrowth = null, chartKmbDistribusi = null;
+function renderKmbCharts(){
+  const CORAL = cssVar('--coral'), VIOLET = cssVar('--violet'), ELECTRIC = cssVar('--electric'),
+        MINT = cssVar('--mint'), TXTDIM = cssVar('--text-dim'), GRID = cssVar('--grid');
+  const monthly = (kmbData && kmbData.monthly) || [];
+  const labels = monthly.map(m => shortBulan(m.bulan));
+  const colorMap = { youtube:CORAL, instagram:VIOLET, facebook:ELECTRIC, tiktok:MINT, x:TXTDIM };
+
+  if(chartKmbGrowth){ chartKmbGrowth.destroy(); chartInstances = chartInstances.filter(c=>c!==chartKmbGrowth); }
+  const growthEl = document.getElementById('chartKmbGrowth');
+  if(growthEl){
+    chartKmbGrowth = new Chart(growthEl, { type:'line',
+      data:{ labels, datasets: KMB_PLATFORMS.map(p => ({
+        label: p.label,
+        data: monthly.map(m => Number(m[p.key]) || 0),
+        borderColor: colorMap[p.key],
+        backgroundColor: colorMap[p.key],
+        fill:false, tension:.35, pointRadius:3,
+      })) },
+      options:{
+        interaction:{ mode:'index', intersect:false },
+        plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10, padding:12, color:TXTDIM } } },
+        scales:{ y:{ grid:{ color:GRID }, ticks:{ color:TXTDIM } }, x:{ grid:{ display:false }, ticks:{ color:TXTDIM } } }
+      }
+    });
+    chartInstances.push(chartKmbGrowth);
+  }
+
+  if(chartKmbDistribusi){ chartKmbDistribusi.destroy(); chartInstances = chartInstances.filter(c=>c!==chartKmbDistribusi); }
+  const distEl = document.getElementById('chartKmbDistribusi');
+  const latest = kmbData && kmbData.latest;
+  if(distEl && latest){
+    chartKmbDistribusi = new Chart(distEl, { type:'doughnut',
+      data:{ labels: KMB_PLATFORMS.map(p=>p.label),
+        datasets:[{ data: KMB_PLATFORMS.map(p => Number(latest[p.key]) || 0),
+          backgroundColor: KMB_PLATFORMS.map(p => colorMap[p.key]), borderWidth:0 }] },
+      options:{ plugins:{ legend:{ position:'bottom', labels:{ boxWidth:10, padding:12, color:TXTDIM } } }, cutout:'65%' }
+    });
+    chartInstances.push(chartKmbDistribusi);
+    const subEl = document.getElementById('kmbDistribusiSub');
+    if(subEl) subEl.textContent = `Total ${Number(latest.totalFollowers).toLocaleString('id-ID')} followers · ${latest.bulan}`;
+  }
+}
+
+function renderKmbTable(){
+  const latest = kmbData && kmbData.latest;
+  const previous = kmbData && kmbData.previous;
+  const body = document.getElementById('kmbTableBody');
+  if(!body || !latest) return;
+  body.innerHTML = KMB_PLATFORMS.map(p => {
+    const nowVal = Number(latest[p.key]) || 0;
+    if(!previous){
+      return `<tr><td>${p.label}</td><td>—</td><td class="mono">${nowVal.toLocaleString('id-ID')}</td><td>—</td><td>—</td></tr>`;
+    }
+    const prevVal = Number(previous[p.key]) || 0;
+    const diff = nowVal - prevVal;
+    const pct = prevVal > 0 ? (diff / prevVal * 100) : null;
+    return `<tr>
+      <td>${p.label}</td>
+      <td class="mono">${prevVal.toLocaleString('id-ID')}</td>
+      <td class="mono">${nowVal.toLocaleString('id-ID')}</td>
+      <td class="mono">${diff >= 0 ? '+' : ''}${diff.toLocaleString('id-ID')}</td>
+      <td class="mono">${pct === null ? '—' : fmtPersenSigned(pct)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function switchView(viewId){
+  const target = document.getElementById(viewId);
+  if(!target) return;
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  const navBtn = document.querySelector(`nav button[data-view="${viewId}"]`);
+  if(navBtn) navBtn.classList.add('active');
+  target.classList.add('active');
+  if(viewId==='transmisi'){
+    if(!transmisiLoaded) loadTransmisiData();
+    else buildTransmisiMap();
+  }
+  if(viewId==='umum' && !umumLoaded) loadUmumData();
+  if(viewId==='keuangan' && !keuanganLoaded) loadKeuanganData();
+  if(viewId==='bmn' && !bmnLoaded) loadBmnData();
+  if(viewId==='kmb' && !kmbLoaded) loadKmbData();
+}
+
+document.querySelectorAll('nav button').forEach(btn=>{
+  btn.addEventListener('click', ()=> switchView(btn.dataset.view));
+});
+
+// Event delegation: any element with data-goto (KPI cards, attention list rows) navigates tabs
+document.addEventListener('click', (e)=>{
+  const el = e.target.closest('[data-goto]');
+  if(el) switchView(el.dataset.goto);
+});
+
+function cssVar(name){ return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+
+/* ======================================================================
+   TAB TRANSMISI — Kondisi Jaringan/Site Pemancar
+   Sumber dinamis: ?action=transmisi_data -> { sites:[...], totalMitraUnik,
+   daftarMitraUnik }. NAMA PETUGAS tidak pernah dikirim mentah oleh server,
+   hanya jumlahOperator (lihat Code.gs).
+
+   STATUS SLOT MUX BUKAN data dari sheet (belum ada kolomnya) -- ini
+   konfigurasi bisnis statis yang disepakati manual, dipisah jelas dari
+   data dinamis API. Site aktif yang tidak terdaftar di sini otomatis
+   dianggap "Tersedia". Ubah/tambah entri di sini kalau kondisi berubah.
+   ====================================================================== */
+const MUX_SLOT_STATUS = {
+  'PALEMBANG': { status: 'full', label: 'FULL' },
+};
+function getMuxSlotStatus(lokasi){
+  const key = String(lokasi || '').trim().toUpperCase();
+  return MUX_SLOT_STATUS[key] || { status: 'available', label: 'Tersedia' };
+}
+
+let transmisiData = null;
+let transmisiLoaded = false;
+let transmisiLoadStarted = false;
+let transmisiActiveKey = 'STATUS';
+
+async function loadTransmisiData(){
+  if(transmisiLoadStarted) return;
+  transmisiLoadStarted = true;
+  const loadingEl = document.getElementById('transmisiLoadingState');
+  const contentEl = document.getElementById('transmisiContent');
+  if(loadingEl){ loadingEl.style.display = 'block'; loadingEl.textContent = 'Memuat data Transmisi dari spreadsheet...'; }
+  try{
+    transmisiData = await fetchTransmisiData();
+    transmisiLoaded = true;
+    if(loadingEl) loadingEl.style.display = 'none';
+    if(contentEl) contentEl.style.display = 'block';
+    renderTransmisiKPI();
+    renderTransmisiSiteCards();
+    renderTransmisiChart(transmisiActiveKey);
+    // Peta Leaflet butuh container yang sudah terlihat supaya ukurannya benar --
+    // hanya bangun sekarang kalau tab TRANSMISI sedang aktif; kalau belum,
+    // switchView() akan memanggil buildTransmisiMap() saat tab ini dibuka.
+    if(document.getElementById('transmisi').classList.contains('active')) buildTransmisiMap();
+    updateTransmisiAttention();
+  }catch(err){
+    console.error('[TRANSMISI] Gagal memuat data:', err);
+    if(loadingEl) loadingEl.textContent = 'Gagal memuat data Transmisi. Pastikan Apps Script sudah mendukung ?action=transmisi_data dan nama sheet persis: TRANSMISI. Detail error ada di console (F12).';
+    transmisiLoadStarted = false;
+  }
+}
+
+function renderTransmisiKPI(){
+  const sites = (transmisiData && transmisiData.sites) || [];
+  const aktif = sites.filter(s => s.status === 'Aktif');
+  const nonaktif = sites.filter(s => s.status !== 'Aktif');
+
+  document.getElementById('transKpiTotal').textContent = sites.length;
+  document.getElementById('transKpiAktif').textContent = aktif.length;
+  document.getElementById('transKpiNonaktif').textContent = nonaktif.length;
+  document.getElementById('transKpiMitra').textContent = transmisiData.totalMitraUnik || 0;
+
+  const fullSites = aktif.filter(s => getMuxSlotStatus(s.lokasi).status === 'full');
+  const slotEl = document.getElementById('transKpiSlot');
+  const slotSubEl = document.getElementById('transKpiSlotSub');
+  if(fullSites.length){
+    slotEl.textContent = `${fullSites.length} Penuh`;
+    slotSubEl.textContent = fullSites.map(s => s.lokasi).join(', ');
+  } else {
+    slotEl.textContent = 'Tersedia';
+    slotSubEl.textContent = 'Semua Site Aktif';
+  }
+}
+
+function renderTransmisiSiteCards(){
+  const sites = (transmisiData && transmisiData.sites) || [];
+  document.getElementById('transmisiSiteCards').innerHTML = sites.map(s=>{
+    const statusPill = s.status==='Aktif' ? '<span class="pill green">Aktif</span>' : '<span class="pill red">Tidak Aktif</span>';
+    const slot = getMuxSlotStatus(s.lokasi);
+    const slotPill = s.status!=='Aktif' ? '<span class="pill violet">Tidak Berlaku</span>'
+      : (slot.status==='full' ? '<span class="pill amber">FULL</span>' : '<span class="pill blue">Tersedia</span>');
+    const mitraList = s.namaMitra && s.namaMitra.length
+      ? `<div class="popup-loc" style="margin-top:6px;">${s.namaMitra.map(m=>`• ${m}`).join('<br>')}</div>`
+      : `<div class="popup-loc" style="margin-top:6px;">Tidak Ada</div>`;
+    return `<div class="tower-card glass">
+      <div class="tower-head">
+        <div><div class="tower-name">${s.lokasi}</div><div class="tower-loc">${s.channel} · ${s.frekuensiText}</div></div>
+        ${statusPill}
+      </div>
+      <div class="tower-metrics">
+        <div><div class="tm-label">Base Power</div><div class="tm-val">${s.basePowerText}</div></div>
+        <div><div class="tm-label">Tinggi Tower</div><div class="tm-val">${s.tinggiTowerText}</div></div>
+        <div><div class="tm-label">Operator</div><div class="tm-val">${s.jumlahOperator} Orang</div></div>
+      </div>
+      <div class="tower-metrics" style="margin-top:10px;">
+        <div><div class="tm-label">Mitra MUX</div><div class="tm-val">${s.jumlahMitraMux} Mitra</div></div>
+        <div><div class="tm-label">Slot MUX</div><div class="tm-val">${slotPill}</div></div>
+      </div>
+      ${mitraList}
+    </div>`;
+  }).join('');
+}
+
+function renderTransmisiChart(key){
+  const CYAN = cssVar('--cyan'), CORAL = cssVar('--coral'), VIOLET = cssVar('--violet'),
+        TXTDIM = cssVar('--text-dim'), GRID = cssVar('--grid');
+  const el = document.getElementById('chartTransmisi');
+  if(!el) return;
+  const old = chartInstances.find(c=>c.canvas && c.canvas.id==='chartTransmisi');
+  if(old){ old.destroy(); chartInstances = chartInstances.filter(c=>c!==old); }
+
+  const sites = (transmisiData && transmisiData.sites) || [];
+  let c;
+
+  if(key === 'STATUS'){
+    const aktif = sites.filter(s=>s.status==='Aktif').length;
+    const nonaktif = sites.length - aktif;
+    c = new Chart(el, { type:'doughnut',
+      data:{ labels:['Aktif','Tidak Aktif'], datasets:[{data:[aktif,nonaktif], backgroundColor:[CYAN,CORAL], borderWidth:0}] },
+      options:{ plugins:{ legend:{ position:'bottom', labels:{boxWidth:10, color:TXTDIM} } }, cutout:'62%' }
+    });
+  } else if(key === 'BASE_POWER'){
+    // Hanya site Aktif dengan Base Power tersedia -- site Tidak Aktif TIDAK dimasukkan.
+    const dataSites = sites.filter(s => s.status==='Aktif' && s.basePower !== null);
+    c = new Chart(el, { type:'bar',
+      data:{ labels: dataSites.map(s=>s.lokasi), datasets:[{ label:'Base Power (W)', data: dataSites.map(s=>s.basePower), backgroundColor:CYAN, borderRadius:8 }] },
+      options:{ plugins:{ legend:{display:false} }, scales:{ y:{ grid:{color:GRID}, ticks:{color:TXTDIM} }, x:{ grid:{display:false}, ticks:{color:TXTDIM} } } }
+    });
+  } else if(key === 'TINGGI_TOWER'){
+    const dataSites = sites.filter(s => s.tinggiTowerMeter !== null);
+    c = new Chart(el, { type:'bar',
+      data:{ labels: dataSites.map(s=>s.lokasi), datasets:[{ label:'Tinggi Tower (m)', data: dataSites.map(s=>s.tinggiTowerMeter), backgroundColor:VIOLET, borderRadius:8 }] },
+      options:{ plugins:{ legend:{display:false} }, scales:{ y:{ grid:{color:GRID}, ticks:{color:TXTDIM} }, x:{ grid:{display:false}, ticks:{color:TXTDIM} } } }
+    });
+  } else if(key === 'MITRA_MUX'){
+    c = new Chart(el, { type:'bar',
+      data:{ labels: sites.map(s=>s.lokasi), datasets:[{ label:'Jumlah Mitra MUX', data: sites.map(s=>s.jumlahMitraMux), backgroundColor:CYAN, borderRadius:8 }] },
+      options:{ plugins:{ legend:{display:false} }, scales:{ y:{ grid:{color:GRID}, ticks:{stepSize:1, color:TXTDIM} }, x:{ grid:{display:false}, ticks:{color:TXTDIM} } } }
+    });
+  } else if(key === 'OPERATOR'){
+    c = new Chart(el, { type:'bar',
+      data:{ labels: sites.map(s=>s.lokasi), datasets:[{ label:'Jumlah Operator', data: sites.map(s=>s.jumlahOperator), backgroundColor:VIOLET, borderRadius:8 }] },
+      options:{ plugins:{ legend:{display:false} }, scales:{ y:{ grid:{color:GRID}, ticks:{color:TXTDIM} }, x:{ grid:{display:false}, ticks:{color:TXTDIM} } } }
+    });
+  }
+  if(c) chartInstances.push(c);
+  return c;
+}
+document.querySelectorAll('#transmisiFilterRow .filter-chip').forEach(chip=>{
+  chip.addEventListener('click', ()=>{
+    document.querySelectorAll('#transmisiFilterRow .filter-chip').forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active');
+    transmisiActiveKey = chip.dataset.key;
+    renderTransmisiChart(transmisiActiveKey);
+  });
+});
+
+// Perbarui baris "Perhatian Manajemen" di Beranda dengan angka Tidak Aktif
+// yang sebenarnya, begitu data Transmisi selesai dimuat (sebelumnya statis).
+function updateTransmisiAttention(){
+  const row = document.querySelector('#attentionList .attention-row[data-goto="transmisi"] .attn-text');
+  if(!row) return;
+  const nonaktif = (transmisiData.sites || []).filter(s=>s.status!=='Aktif').length;
+  row.textContent = nonaktif > 0
+    ? `${nonaktif} site transmisi berstatus Tidak Aktif`
+    : 'Semua site transmisi berstatus Aktif';
+}
+
+// ===== Perhatian Manajemen (Beranda Baris 4) — agregasi lintas modul =====
+// Item Transmisi disembunyikan sementara bersama tab TRANSMISI. Item BMN
+// TIDAK lagi angka statis -- dibangun dinamis dari BMN_Jadwal begitu data
+// BMN selesai dimuat (lihat renderBmnAttentionFromJadwal di Tab BMN), lalu
+// digabung dengan item statis lain di sini lewat renderAttentionList().
+const attentionItems = [
+  // Item pensiun & surat diproses sudah dihapus atas permintaan —
+  // akan diganti item lain nantinya.
+];
+let bmnAttentionItems = [];
+function renderAttentionList(){
+  const combined = attentionItems.concat(bmnAttentionItems);
+  if(combined.length === 0){
+    document.getElementById('attentionList').innerHTML = '<div class="attention-empty">Tidak ada perhatian khusus saat ini.</div>';
+    return;
+  }
+  document.getElementById('attentionList').innerHTML = combined.map(a=>`
+    <div class="attention-row" data-goto="${a.goto}">
+      <span class="attn-dot ${a.level}"></span>
+      <span class="attn-text">${a.text}</span>
+      <span class="attn-arrow">${a.goto.toUpperCase()} →</span>
+    </div>`).join('');
+}
+renderAttentionList();
+
+Chart.defaults.font.family = "'Inter', sans-serif";
+Chart.defaults.font.size = 11.5;
+let chartInstances = [];
+function grad(ctx, color){
+  const g = ctx.createLinearGradient(0,0,0,240);
+  g.addColorStop(0, color+'66');
+  g.addColorStop(1, color+'02');
+  return g;
+}
+function mkChart(id, config){
+  const el = document.getElementById(id);
+  if(!el) return;
+  const c = new Chart(el, config);
+  chartInstances.push(c);
+  return c;
+}
+function destroyAllCharts(){ chartInstances.forEach(c=>c.destroy()); chartInstances = []; }
+
+// ===== Beranda Baris 2 — Grafik interaktif dengan filter =====
+// Data diambil dari kmbData.monthly (sheet KMB_SOSMED via ?action=kmb_data) --
+// tidak ada lagi angka hardcode. Selama kmbData belum termuat, chart tampil
+// kosong dan otomatis dirender ulang begitu loadKmbData() selesai.
+function getFollowersSeries(){
+  const monthly = (kmbData && kmbData.monthly) || [];
+  return {
+    labels: monthly.map(m => shortBulan(m.bulan)),
+    TOTAL:     monthly.map(m => Number(m.totalFollowers) || 0),
+    INSTAGRAM: monthly.map(m => Number(m.instagram) || 0),
+    FACEBOOK:  monthly.map(m => Number(m.facebook) || 0),
+    YOUTUBE:   monthly.map(m => Number(m.youtube) || 0),
+    TIKTOK:    monthly.map(m => Number(m.tiktok) || 0),
+    X:         monthly.map(m => Number(m.x) || 0),
+  };
+}
+let followersActiveKey = 'TOTAL';
+function renderFollowersChart(key){
+  const CYAN = cssVar('--cyan'), TXTDIM = cssVar('--text-dim'), GRID = cssVar('--grid');
+  const el = document.getElementById('chartFollowersBeranda');
+  if(!el) return;
+  const followersSeries = getFollowersSeries();
+  const c = new Chart(el, { type:'line',
+    data:{labels:followersSeries.labels,
+      datasets:[{label:key==='TOTAL'?'Total Followers':key, data:followersSeries[key] || [],
+        borderColor:CYAN, backgroundColor:(ctx)=>grad(ctx.chart.ctx,CYAN), fill:true, tension:.35, pointRadius:3, pointBackgroundColor:CYAN}]},
+    options:{plugins:{legend:{display:false}}, scales:{y:{grid:{color:GRID}, ticks:{color:TXTDIM}}, x:{grid:{display:false}, ticks:{color:TXTDIM}}}}
+  });
+  chartInstances.push(c);
+  return c;
+}
+document.querySelectorAll('#followersFilterRow .filter-chip').forEach(chip=>{
+  chip.addEventListener('click', ()=>{
+    document.querySelectorAll('#followersFilterRow .filter-chip').forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active');
+    followersActiveKey = chip.dataset.key;
+    const old = chartInstances.find(c=>c.canvas.id==='chartFollowersBeranda');
+    if(old){ old.destroy(); chartInstances = chartInstances.filter(c=>c!==old); }
+    renderFollowersChart(followersActiveKey);
+  });
+});
+
+const sdmComposition = {
+  GENERASI:   {type:'doughnut', labels:['Gen X','Milenial','Baby Boomer','Gen Z'], data:[38,41,22,25]},
+  USIA:       {type:'doughnut', labels:['20–30','31–40','41–50','51–60','>60'], data:[18,34,40,28,6]},
+  JABATAN:    {type:'bar', labels:['Teknis','Administrasi','Fungsional','Struktural'], data:[45,31,28,22]},
+  UNIT_KERJA: {type:'bar', labels:['Teknik','Produksi','Berita','Umum','KMB'], data:[26,30,24,25,21]},
+};
+let sdmActiveKey = 'GENERASI';
+function renderSDMChart(key){
+  const CYAN=cssVar('--cyan'), VIOLET=cssVar('--violet'), AMBER=cssVar('--amber'), CORAL=cssVar('--coral'), MINT=cssVar('--mint'),
+        TXTDIM=cssVar('--text-dim'), GRID=cssVar('--grid');
+  const palette=[CYAN,VIOLET,AMBER,CORAL,MINT];
+  const el = document.getElementById('chartSDMBeranda');
+  if(!el) return;
+  const data = sdmComposition[key];
+  let c;
+  if(data.type==='doughnut'){
+    c = new Chart(el, {type:'doughnut',
+      data:{labels:data.labels, datasets:[{data:data.data, backgroundColor:palette, borderWidth:0}]},
+      options:{plugins:{legend:{position:'bottom', labels:{boxWidth:10, padding:14, color:TXTDIM}}}, cutout:'62%'}
+    });
+  } else {
+    c = new Chart(el, {type:'bar',
+      data:{labels:data.labels, datasets:[{data:data.data, backgroundColor:VIOLET, borderRadius:8}]},
+      options:{plugins:{legend:{display:false}}, scales:{y:{grid:{color:GRID}, ticks:{color:TXTDIM}}, x:{grid:{display:false}, ticks:{color:TXTDIM}}}}
+    });
+  }
+  chartInstances.push(c);
+  return c;
+}
+document.querySelectorAll('#sdmFilterRow .filter-chip').forEach(chip=>{
+  chip.addEventListener('click', ()=>{
+    document.querySelectorAll('#sdmFilterRow .filter-chip').forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active');
+    sdmActiveKey = chip.dataset.key;
+    const old = chartInstances.find(c=>c.canvas.id==='chartSDMBeranda');
+    if(old){ old.destroy(); chartInstances = chartInstances.filter(c=>c!==old); }
+    renderSDMChart(sdmActiveKey);
+  });
+});
+
+let mapInitialized = false, leafletMap = null, tileLayer = null;
+// Peta HANYA dibangun setelah transmisiData tersedia (dipanggil dari
+// loadTransmisiData). Koordinat berasal dari KOORDINAT LOKASI di Sheets --
+// site yang gagal diparse (latitude/longitude null) dilewati, tidak
+// diberi koordinat kira-kira.
+function buildTransmisiMap(){
+  const sites = (transmisiData && transmisiData.sites) || [];
+  if(!sites.length) return;
+
+  if(!mapInitialized){
+    mapInitialized = true;
+    leafletMap = L.map('mapPemancar', {scrollWheelZoom:false}).setView([-3.35, 103.9], 7.3);
+    setMapTheme();
+  } else {
+    // rebuild marker (mis. setelah reload data) -- bersihkan marker lama dulu
+    leafletMap.eachLayer(layer => { if(layer instanceof L.Marker) leafletMap.removeLayer(layer); });
+  }
+
+  sites.forEach(s=>{
+    if(s.latitude === null || s.longitude === null) return; // koordinat gagal diparse, jangan mengarang posisi
+    const color = s.status==='Aktif' ? cssVar('--cyan') : cssVar('--coral');
+    const icon = L.divIcon({ className:'', html:`<div class="tower-pin" style="background:${color};"></div>`, iconSize:[16,16], iconAnchor:[8,8] });
+    const slot = getMuxSlotStatus(s.lokasi);
+    const slotLabel = s.status!=='Aktif' ? 'Tidak Berlaku' : slot.label;
+    const mitraLine = s.namaMitra && s.namaMitra.length ? s.namaMitra.join(', ') : 'Tidak Ada';
+    const popupHtml = `
+      <div class="popup-title">${s.lokasi}</div>
+      <div class="popup-loc">${s.koordinatText}</div>
+      <div class="popup-row"><span>Status</span><span>${s.status}</span></div>
+      <div class="popup-row"><span>Base Power</span><span>${s.basePowerText}</span></div>
+      <div class="popup-row"><span>Tinggi Tower</span><span>${s.tinggiTowerText}</span></div>
+      <div class="popup-row"><span>Frekuensi</span><span>${s.frekuensiText}</span></div>
+      <div class="popup-row"><span>Channel</span><span>${s.channel}</span></div>
+      <div class="popup-row"><span>Operator</span><span>${s.jumlahOperator} Orang</span></div>
+      <div class="popup-row"><span>Mitra MUX</span><span>${s.jumlahMitraMux} Mitra</span></div>
+      <div class="popup-row"><span>Slot MUX</span><span>${slotLabel}</span></div>
+      <div class="popup-loc" style="margin-top:8px;">Mitra: ${mitraLine}</div>`;
+    L.marker([s.latitude, s.longitude], {icon}).addTo(leafletMap).bindPopup(popupHtml);
+  });
+  setTimeout(()=>leafletMap.invalidateSize(), 200);
+}
+function setMapTheme(){
+  if(tileLayer) leafletMap.removeLayer(tileLayer);
+  const isLight = root.classList.contains('light');
+  const url = isLight
+    ? 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
+    : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+  tileLayer = L.tileLayer(url, { attribution:'&copy; OpenStreetMap &copy; CARTO', maxZoom:18 }).addTo(leafletMap);
+}
+
+function buildCharts(){
+  const CYAN = cssVar('--cyan'), VIOLET = cssVar('--violet'),
+        AMBER = cssVar('--amber'), CORAL = cssVar('--coral'), MINT = cssVar('--mint'),
+        TXTDIM = cssVar('--text-dim'), GRID = cssVar('--grid');
+  Chart.defaults.color = TXTDIM;
+
+  renderFollowersChart(followersActiveKey);
+  renderSDMChart(sdmActiveKey);
+
+  mkChart('chartJabatan', { type:'bar',
+    data:{labels:['Struktural','Teknisi','Jurnalis/Produser','Administrasi','Kameramen/Editor'],
+      datasets:[{data:[14,28,22,31,31], backgroundColor:VIOLET, borderRadius:8}]},
+    options:{indexAxis:'y', plugins:{legend:{display:false}}, scales:{x:{grid:{color:GRID}, ticks:{color:TXTDIM}}, y:{grid:{display:false}, ticks:{color:TXTDIM}}}}
+  });
+  mkChart('chartUsia', { type:'bar',
+    data:{labels:['25-34','35-44','45-54','55-60'], datasets:[{data:[22,38,41,25], backgroundColor:[CYAN,VIOLET,AMBER,CORAL], borderRadius:8}]},
+    options:{plugins:{legend:{display:false}}, scales:{y:{grid:{color:GRID}, ticks:{color:TXTDIM}}, x:{grid:{display:false}, ticks:{color:TXTDIM}}}}
+  });
+  mkChart('chartSKP', { type:'radar',
+    data:{labels:['Program & Berita','Teknisi/Transmisi','Administrasi','Keuangan','Umum & SDM'],
+      datasets:[{label:'Nilai SKP Rata-rata', data:[86,81,79,84,77], borderColor:CYAN, backgroundColor:CYAN+'2E', pointBackgroundColor:CYAN}]},
+    options:{plugins:{legend:{display:false}}, scales:{r:{min:60,max:100, grid:{color:GRID}, angleLines:{color:GRID}, pointLabels:{color:TXTDIM}, ticks:{color:TXTDIM, backdropColor:'transparent'}}}}
+  });
+  mkChart('chartKehadiran', { type:'line',
+    data:{labels:['Feb','Mar','Apr','Mei','Jun','Jul'],
+      datasets:[{label:'Kehadiran (%)', data:[96.2,95.8,97.1,96.5,95.9,97.3], borderColor:MINT, backgroundColor:(c)=>grad(c.chart.ctx,MINT), fill:true, tension:.35, pointRadius:3, pointBackgroundColor:MINT}]},
+    options:{plugins:{legend:{display:false}}, scales:{y:{min:90,max:100, grid:{color:GRID}, ticks:{color:TXTDIM}}, x:{grid:{display:false}, ticks:{color:TXTDIM}}}}
+  });
+}
+function rebuildAllCharts(){
+  destroyAllCharts();
+  buildCharts();
+  if(transmisiLoaded) renderTransmisiChart(transmisiActiveKey);
+}
+buildCharts();
+
+// Dijalankan berurutan (bukan paralel) supaya tidak membanjiri Apps Script
+// Web App dengan banyak request sekaligus saat halaman pertama kali dibuka.
+// PENTING: fungsi ini sekarang HANYA dipanggil SETELAH login berhasil (lihat
+// SISTEM LOGIN di atas) -- supaya data sheet yang sesungguhnya tidak pernah
+// diminta ke Apps Script sebelum ada token valid.
+async function startDashboardData(){
+  await loadSdmData();
+  await loadUmumData();
+  // BMN dimuat sejak awal (bukan cuma saat tab BMN diklik) karena Beranda
+  // sekarang menampilkan KPI "Total Aset BMN" dan item BMN_Jadwal di
+  // Perhatian Manajemen -- keduanya butuh bmnData tersedia begitu Beranda
+  // pertama kali tampil.
+  await loadBmnData();
+  // KMB & TRANSMISI disembunyikan sementara -> fetch-nya juga dimatikan
+  // sementara supaya tidak ada request percuma ke Apps Script. Un-comment
+  // 2 baris ini lagi saat tab KMB & TRANSMISI dimunculkan kembali.
+  // await loadKmbData();
+  // await loadTransmisiData();
+}
+
+if(authToken){
+  // Sudah pernah login di tab ini sebelumnya (token masih ada di
+  // sessionStorage) -> langsung tampilkan dashboard tanpa minta login lagi.
+  hideLogin();
+  startDashboardData();
+} else {
+  showLogin();
+}
+</script>
+</body>
+</html>
