@@ -81,13 +81,12 @@
   .brand-text .sub{font-size:10.5px; color:var(--text-faint); margin-top:2px; letter-spacing:.5px;}
   .header-right{display:flex; align-items:center; gap:14px;}
   .onair{
-    display:flex; align-items:center; gap:8px;
+    display:flex; align-items:center; justify-content:center;
+    width:34px; height:34px; border-radius:50%;
     background:color-mix(in srgb, var(--mint) 14%, transparent);
     border:1px solid color-mix(in srgb, var(--mint) 40%, transparent);
-    padding:7px 14px; border-radius:100px;
-    font-family:'IBM Plex Mono'; font-size:11px; letter-spacing:.5px; color:var(--mint);
   }
-  .dot{width:7px;height:7px;border-radius:50%;background:var(--mint); animation:pulse 1.8s infinite;}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--mint); animation:pulse 1.8s infinite;}
   @keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb, var(--mint) 60%, transparent);}70%{box-shadow:0 0 0 8px transparent;}100%{box-shadow:0 0 0 0 transparent;}}
   .theme-toggle{display:flex; align-items:center; gap:8px; cursor:pointer; padding:6px 8px; border-radius:100px; border:1px solid var(--glass-border); background:var(--glass-strong); user-select:none;}
   .theme-toggle .track{width:44px;height:24px;border-radius:100px; position:relative; background:linear-gradient(90deg,var(--electric),var(--cyan));}
@@ -229,11 +228,40 @@
     .stat-grid-5{grid-template-columns:repeat(3,1fr);}
   }
   @media(max-width:900px){
-    .stat-grid{grid-template-columns:repeat(2,1fr);}
-    .stat-grid-5{grid-template-columns:repeat(2,1fr);}
+    .stat-grid{grid-template-columns:repeat(2,1fr) !important;}
+    .stat-grid-5{grid-template-columns:repeat(2,1fr) !important;}
     .grid-2{grid-template-columns:1fr;}
     .grid-2-equal{grid-template-columns:1fr;}
     header{padding:12px 16px; margin:12px 12px 0;} nav{margin:12px 12px 0;} main{padding:18px 12px 70px;}
+  }
+
+  /* ===================== PERBAIKAN HEADER DI LAYAR PONSEL (VERTIKAL) =====================
+     Sebelumnya header TIDAK punya aturan menyusut untuk layar sempit -- logo+judul di kiri
+     dan status/tombol di kanan sama-sama mempertahankan ukuran penuhnya, sehingga total
+     lebarnya melebihi panel header dan sisi kanan "tumpah" keluar dari batas panel.
+     Perbaikan di sini membuat sisi kiri (brand) yang menyusut & membungkus teksnya,
+     sedangkan sisi kanan (status/tombol) tetap utuh ukurannya tapi dibuat lebih ringkas. */
+  @media(max-width:600px){
+    header{ flex-wrap:nowrap; gap:8px; }
+    .brand{ flex:1 1 auto; min-width:0; gap:8px; }
+    .brand-text{ min-width:0; }
+    .brand-text .title{ font-size:11.5px; line-height:1.3; white-space:normal; }
+    .brand-text .sub{ display:none; }
+    .brand-mark.brand-logo{ min-width:52px; height:42px; padding:4px 7px; }
+    .brand-mark.brand-logo img{ height:30px; max-width:88px; }
+    .header-right{ flex:0 0 auto; gap:6px; }
+    .onair{ width:26px; height:26px; }
+    .dot{ width:7px; height:7px; }
+    .theme-toggle{ padding:5px 6px; gap:0; }
+    .theme-toggle .mono{ display:none; }
+    .theme-toggle .track{ width:36px; height:20px; }
+    .theme-toggle .knob{ width:16px; height:16px; font-size:9px; }
+    html.light .theme-toggle .knob{ left:18px; }
+    .account-chip{ padding:5px 6px 5px 5px; gap:5px; }
+    .account-avatar{ width:20px; height:20px; font-size:10px; }
+    .account-name{ max-width:56px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:11px; }
+    .account-caret{ display:none; }
+    .account-dropdown{ right:-8px; }
   }
 
     /* TVRI Sumsel logo adjustment (diperbesar 30% dari ukuran sebelumnya) */
@@ -291,13 +319,13 @@
   #loginOverlay.hidden{ display:none; }
   .login-card{ width:100%; max-width:380px; padding:38px 34px 30px; text-align:center; }
   .login-logo{
-    width:64px; height:64px; border-radius:18px; overflow:hidden;
+    width:90px; height:90px; border-radius:22px; overflow:hidden;
     background:linear-gradient(135deg,var(--cyan),var(--electric));
     display:flex; align-items:center; justify-content:center;
     margin:0 auto 18px;
-    box-shadow:0 0 30px color-mix(in srgb, var(--cyan) 55%, transparent);
+    box-shadow:0 0 34px color-mix(in srgb, var(--cyan) 55%, transparent);
   }
-  .login-logo img{ width:100%; height:100%; object-fit:contain; padding:9px; }
+  .login-logo img{ width:100%; height:100%; object-fit:contain; padding:13px; }
   .login-title{ font-family:'Orbitron'; font-weight:700; font-size:16.5px; letter-spacing:.4px; }
   .login-sub{ font-size:11.5px; color:var(--text-faint); margin:6px 0 26px; letter-spacing:.4px; font-family:'IBM Plex Mono'; }
   .login-field{ text-align:left; margin-bottom:14px; }
@@ -308,6 +336,15 @@
     transition:border-color .2s ease;
   }
   .login-field input:focus{ border-color:var(--cyan); }
+  .login-field .pw-wrap{ position:relative; }
+  .login-field .pw-wrap input{ padding-right:42px; }
+  .login-field .pw-toggle{
+    position:absolute; right:6px; top:50%; transform:translateY(-50%);
+    width:28px; height:28px; display:flex; align-items:center; justify-content:center;
+    background:none; border:none; cursor:pointer; color:var(--text-faint); font-size:15px;
+    border-radius:8px;
+  }
+  .login-field .pw-toggle:hover{ color:var(--text-dim); }
   .login-btn{
     width:100%; margin-top:8px; padding:12px 14px; border:none; border-radius:12px;
     font-family:'Space Grotesk'; font-weight:700; font-size:13.5px; letter-spacing:.3px; color:#04101F; cursor:pointer;
@@ -325,12 +362,29 @@
   }
   .login-error.show{ display:block; }
   .login-foot{ margin-top:22px; font-size:10px; color:var(--text-faint); font-family:'IBM Plex Mono'; letter-spacing:.4px; }
-  .logout-btn{
-    display:flex; align-items:center; gap:6px; cursor:pointer; padding:8px 14px; border-radius:100px;
-    border:1px solid var(--glass-border); background:var(--glass-strong); color:var(--text-dim);
-    font-family:'IBM Plex Mono'; font-size:10.5px; letter-spacing:.4px;
+  .account-menu{ position:relative; }
+  .account-chip{
+    display:flex; align-items:center; gap:8px; cursor:pointer; padding:6px 8px 6px 6px; border-radius:100px;
+    border:1px solid var(--glass-border); background:var(--glass-strong); color:var(--text);
+    font-family:'Inter'; font-size:12.5px; font-weight:600;
   }
-  .logout-btn:hover{ color:var(--coral); }
+  .account-avatar{
+    width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(135deg,var(--cyan),var(--electric)); font-size:12px;
+  }
+  .account-caret{ font-size:9px; color:var(--text-faint); }
+  .account-dropdown{
+    position:absolute; top:calc(100% + 8px); right:0; min-width:150px;
+    background:var(--glass-strong); backdrop-filter:blur(22px) saturate(160%); -webkit-backdrop-filter:blur(22px) saturate(160%);
+    border:1px solid var(--glass-border); border-radius:14px; box-shadow:var(--shadow);
+    padding:6px; display:none; z-index:50;
+  }
+  .account-dropdown.show{ display:block; }
+  .account-dropdown-item{
+    width:100%; text-align:left; padding:9px 10px; border:none; background:none; cursor:pointer;
+    border-radius:9px; font-family:'IBM Plex Mono'; font-size:11.5px; letter-spacing:.3px; color:var(--coral);
+  }
+  .account-dropdown-item:hover{ background:color-mix(in srgb, var(--coral) 12%, transparent); }
 
   </style>
 </head>
@@ -352,7 +406,10 @@
       </div>
       <div class="login-field">
         <label for="loginPassword">Password</label>
-        <input type="password" id="loginPassword" autocomplete="current-password" required>
+        <div class="pw-wrap">
+          <input type="password" id="loginPassword" autocomplete="current-password" required>
+          <button type="button" class="pw-toggle" id="loginPwToggle" tabindex="-1" aria-label="Lihat password">👁</button>
+        </div>
       </div>
       <button type="submit" class="login-btn" id="loginBtn">Masuk</button>
     </form>
@@ -376,12 +433,21 @@
     </div>
   </div>
   <div class="header-right">
-    <div class="onair" id="connStatus"><span class="dot"></span> DATA CONTOH</div>
+    <div class="onair" id="connStatus" title="Memeriksa koneksi API..."><span class="dot"></span></div>
     <div class="theme-toggle" id="themeToggle">
       <span class="mono" style="font-size:10.5px; color:var(--text-dim);">MODE</span>
       <div class="track"><div class="knob" id="knob">☀️</div></div>
     </div>
-    <div class="logout-btn" id="logoutBtn">🔒 KELUAR</div>
+    <div class="account-menu" id="accountMenu">
+      <button class="account-chip" id="accountChip">
+        <span class="account-avatar">👤</span>
+        <span class="account-name" id="accountName">-</span>
+        <span class="account-caret">▾</span>
+      </button>
+      <div class="account-dropdown" id="accountDropdown">
+        <button class="account-dropdown-item" id="logoutBtn">🔒 Keluar</button>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -969,6 +1035,7 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbzM6KT1l2Pwb87WYRyNcp6A
      status koneksi tetap bisa dicek sebelum login.
    ====================================================================== */
 let authToken = sessionStorage.getItem('tvri_token') || null;
+let authUsername = sessionStorage.getItem('tvri_username') || null;
 
 function showLogin(message){
   document.getElementById('loginOverlay').classList.remove('hidden');
@@ -979,12 +1046,38 @@ function showLogin(message){
 function hideLogin(){
   document.getElementById('loginOverlay').classList.add('hidden');
 }
+function updateAccountChip(){
+  const el = document.getElementById('accountName');
+  if(el) el.textContent = authUsername || '-';
+}
 function logout(){
   authToken = null;
+  authUsername = null;
   sessionStorage.removeItem('tvri_token');
+  sessionStorage.removeItem('tvri_username');
   location.reload();
 }
 document.getElementById('logoutBtn').addEventListener('click', logout);
+
+// Dropdown akun: klik chip untuk buka/tutup, klik di luar untuk menutup.
+const accountChip = document.getElementById('accountChip');
+const accountDropdown = document.getElementById('accountDropdown');
+accountChip.addEventListener('click', (e)=>{
+  e.stopPropagation();
+  accountDropdown.classList.toggle('show');
+});
+document.addEventListener('click', ()=> accountDropdown.classList.remove('show'));
+
+// Tombol mata untuk melihat isi password saat login.
+document.getElementById('loginPwToggle').addEventListener('click', ()=>{
+  const input = document.getElementById('loginPassword');
+  const btn = document.getElementById('loginPwToggle');
+  const showing = input.type === 'text';
+  input.type = showing ? 'password' : 'text';
+  btn.textContent = showing ? '👁' : '🙈';
+});
+
+updateAccountChip();
 
 document.getElementById('loginForm').addEventListener('submit', async (e)=>{
   e.preventDefault();
@@ -1005,7 +1098,10 @@ document.getElementById('loginForm').addEventListener('submit', async (e)=>{
     const json = await res.json();
     if(json.error || !json.token) throw new Error(json.error || 'LOGIN_GAGAL');
     authToken = json.token;
+    authUsername = json.username;
     sessionStorage.setItem('tvri_token', authToken);
+    sessionStorage.setItem('tvri_username', authUsername);
+    updateAccountChip();
     hideLogin();
     startDashboardData();
   }catch(err){
@@ -1107,7 +1203,11 @@ async function fetchTransmisiData(){
 async function testKoneksiAPI(){
   const badge = document.getElementById('connStatus');
   if(!API_URL){
-    badge.innerHTML = '<span class="dot" style="background:var(--text-faint); animation:none;"></span> DATA CONTOH';
+    badge.title = 'API belum diisi -- menampilkan data contoh';
+    badge.style.color = 'var(--text-faint)';
+    badge.style.borderColor = 'color-mix(in srgb, var(--text-faint) 40%, transparent)';
+    badge.style.background = 'color-mix(in srgb, var(--text-faint) 14%, transparent)';
+    badge.innerHTML = '<span class="dot" style="background:var(--text-faint); animation:none;"></span>';
     return;
   }
   try{
@@ -1116,13 +1216,15 @@ async function testKoneksiAPI(){
     const json = await res.json();
     if(json.error) throw new Error(json.error);
     console.log('[API] Terhubung. Daftar sheet tersedia:', json.sheets);
-    badge.innerHTML = '<span class="dot"></span> TERHUBUNG API';
+    badge.title = 'Terhubung ke API';
+    badge.innerHTML = '<span class="dot"></span>';
     badge.style.color = 'var(--mint)';
     badge.style.borderColor = 'color-mix(in srgb, var(--mint) 40%, transparent)';
     badge.style.background = 'color-mix(in srgb, var(--mint) 14%, transparent)';
   }catch(err){
     console.error('[API] Gagal konek ke API:', err);
-    badge.innerHTML = '<span class="dot" style="background:var(--coral); animation:none;"></span> GAGAL KONEKSI';
+    badge.title = 'Gagal terhubung ke API';
+    badge.innerHTML = '<span class="dot" style="background:var(--coral); animation:none;"></span>';
     badge.style.color = 'var(--coral)';
     badge.style.borderColor = 'color-mix(in srgb, var(--coral) 40%, transparent)';
     badge.style.background = 'color-mix(in srgb, var(--coral) 14%, transparent)';
@@ -2953,6 +3055,7 @@ async function startDashboardData(){
 if(authToken){
   // Sudah pernah login di tab ini sebelumnya (token masih ada di
   // sessionStorage) -> langsung tampilkan dashboard tanpa minta login lagi.
+  updateAccountChip();
   hideLogin();
   startDashboardData();
 } else {
